@@ -7,7 +7,7 @@
 <style>
   :root{--bg:#0f1720;--card:#16212e;--line:#26384a;--txt:#e7eef6;--muted:#9fb2c6;
     --poptavka:#2563eb;--objednavka:#16a34a;--accent:#3b82f6;--head:#111c28;--title:#142433;
-    --pos:#16a34a;--neg:#ef4444;--edit:#0c131b;--rucni:#1a2740;--editing:#1d2c1f;}
+    --pos:#16a34a;--neg:#ef4444;--edit:#0c131b;--rucni:#1a2740;--editing:#1d2c1f;--smlouva:#b45309;}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);-webkit-text-size-adjust:100%}
   header{position:sticky;top:0;z-index:5;background:#0c131b;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -25,7 +25,7 @@
   .seg button{background:var(--edit);color:var(--muted);border:0;padding:8px 12px;font-size:13px;cursor:pointer}
   .seg button.on{background:var(--accent);color:#fff;font-weight:700}
   .badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
-  .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)}
+  .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)} .b-sml{background:var(--smlouva)}
   .stavba{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
   .stavba .title{padding:12px 14px;border-bottom:1px solid var(--line);background:var(--title);display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
   .stavba .title .nazev{font-size:18px;font-weight:800;letter-spacing:.4px}
@@ -88,7 +88,7 @@
   <div class="toolbar">
     <input id="search" class="ctrl" placeholder="🔎 hledat…">
     <select id="f-stavba" class="ctrl"><option value="">Všechny stavby</option></select>
-    <div class="seg" id="f-typ"><button data-v="all" class="on">Vše</button><button data-v="pop">Poptávky</button><button data-v="obj">Objednávky</button></div>
+    <div class="seg" id="f-typ"><button data-v="all" class="on">Vše</button><button data-v="pop">Poptávky</button><button data-v="obj">Objednávky</button><button data-v="sml">Smlouvy</button></div>
     <div class="seg" id="f-stav"><button data-v="all" class="on">Vše</button><button data-v="obj">Objednáno</button><button data-v="ceka">Čeká</button></div>
   </div>
   <div id="list"></div>
@@ -126,6 +126,11 @@ var db=null, auth=null, started=false;
 function fmtNum(v){if(v===''||v==null)return '';var n=(typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));if(isNaN(n))return esc(v);return n.toLocaleString('cs-CZ',{minimumFractionDigits:0,maximumFractionDigits:2});}
 function toNum(v){var n=(typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
 function isObj(p){return (p.typ||'').toUpperCase().indexOf('OBJ')===0;}
+function typKind(p){var t=(p.typ||'').toUpperCase(),z=(p.zasmluvneni||'').toLowerCase();
+  if(t.indexOf('SMLOU')===0 || z.indexOf('smlouv')!==-1 || z.indexOf('rs')!==-1) return 'sml';
+  if(t.indexOf('OBJ')===0 || z.indexOf('obj')!==-1 || (p.objednano||'').toUpperCase().indexOf('ANO')===0) return 'obj';
+  return 'pop';}
+function badgeHtml(p){var k=typKind(p),m={pop:['b-pop','POP'],obj:['b-obj','OBJ'],sml:['b-sml','SML']}[k];return '<span class="badge '+m[0]+'">'+m[1]+'</span>';}
 function slug(s){return String(s).replace(/[„""]/g,'').replace(/[.$#\[\]\/\x00-\x1f]+/g,'_').replace(/\s+/g,'_').slice(0,180);}
 function rowKey(nazev,komodita){return (slug(nazev)+'__'+slug(komodita)).slice(0,200);}
 function eff(nazev,p0){var k=rowKey(nazev,p0.komodita),ov=(DATA.upravy&&DATA.upravy[k])?DATA.upravy[k]:{},o={};
@@ -134,8 +139,8 @@ function eff(nazev,p0){var k=rowKey(nazev,p0.komodita),ov=(DATA.upravy&&DATA.upr
 function buildStavbaFilter(){var sel=$('f-stavba'),cur=sel.value,opts='<option value="">Všechny stavby</option>';
   (DATA.stavby||[]).forEach(function(s,i){opts+='<option value="'+i+'">'+esc((s.nazev||'').replace(/[„""]/g,'').trim())+'</option>';});
   sel.innerHTML=opts; sel.value=cur;}
-function passFilter(nazev,p){var objedn=isObj(p);
-  if(FILTER.typ==='pop'&&objedn)return false; if(FILTER.typ==='obj'&&!objedn)return false;
+function passFilter(nazev,p){var kind=typKind(p);
+  if(FILTER.typ!=='all' && FILTER.typ!==kind) return false;
   var jeObj=(String(p.objednano||'').toUpperCase().indexOf('ANO')===0);
   if(FILTER.stav==='obj'&&!jeObj)return false; if(FILTER.stav==='ceka'&&jeObj)return false;
   var q=FILTER.q.trim().toLowerCase();
@@ -143,7 +148,7 @@ function passFilter(nazev,p){var objedn=isObj(p);
   return true;}
 function uspora(p){var nN=toNum(p.cenaNakladova),nV=toNum(p.cenaVysoutezena);if(nN!=null&&nV!=null){var d=nN-nV;return '<span class="'+(d>=0?'uspora-pos':'uspora-neg')+'">'+fmtNum(d)+'</span>';}return '';}
 function C(mode,k,f,val,cls){return '<input class="cell '+(cls||'')+'" data-mode="'+mode+'" data-k="'+esc(k)+'" data-f="'+f+'" value="'+esc(val||'')+'">';}
-function typSel(mode,k,p){return '<select class="cell" data-mode="'+mode+'" data-k="'+esc(k)+'" data-f="typ"><option value="POPTÁVKA"'+(!isObj(p)?' selected':'')+'>POP</option><option value="OBJEDNÁVKA"'+(isObj(p)?' selected':'')+'>OBJ</option></select>';}
+function typSel(mode,k,p){var kd=typKind(p);return '<select class="cell" data-mode="'+mode+'" data-k="'+esc(k)+'" data-f="typ"><option value="POPTÁVKA"'+(kd==='pop'?' selected':'')+'>POP</option><option value="OBJEDNÁVKA"'+(kd==='obj'?' selected':'')+'>OBJ</option><option value="SMLOUVA"'+(kd==='sml'?' selected':'')+'>SML</option></select>';}
 function noteCell(nazev,komodita){var key=rowKey(nazev,komodita),mp=(DATA.poznamky&&DATA.poznamky[key])?DATA.poznamky[key]:'';
   return '<td><textarea class="note" data-notekey="'+esc(key)+'" placeholder="moje poznámka…">'+esc(mp)+'</textarea><div class="note-status" data-st="'+esc(key)+'"></div></td>';}
 
@@ -158,8 +163,7 @@ function mRow(nazev,p,k){
       +'<td class="cena">'+C('m',k,'cenaNakladova',p.cenaNakladova,'num')+'</td><td class="cena">'+C('m',k,'cenaVysoutezena',p.cenaVysoutezena,'num')+'</td>'
       +'<td class="cena">'+uspora(p)+'</td><td>'+C('m',k,'poznamka',p.poznamka)+'</td>'+noteCell(nazev,p.komodita)+'</tr>';
   }
-  var bcls=isObj(p)?'b-obj':'b-pop';
-  return '<tr><td class="komodita">'+head+'<span class="badge '+bcls+'">'+(isObj(p)?'OBJ':'POP')+'</span> '+esc(p.komodita)+'</td>'
+  return '<tr><td class="komodita">'+head+badgeHtml(p)+' '+esc(p.komodita)+'</td>'
     +'<td class="c">'+esc(p.kolo1)+'</td><td class="c">'+esc(p.kolo2)+'</td><td class="c">'+esc(p.kolo3)+'</td>'
     +'<td class="c">'+esc(p.vitez)+'</td><td class="c">'+esc(p.zasmluvneni)+'</td><td class="c">'+esc(p.objednano)+'</td>'
     +'<td class="cena">'+fmtNum(p.cenaNakladova)+'</td><td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td><td class="cena">'+uspora(p)+'</td>'
