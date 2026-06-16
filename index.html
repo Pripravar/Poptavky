@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Poptávky a objednávky — M-SILNICE OZ Jih</title>
+<title>Poptávky a objednávky — M - SILNICE a.s.</title>
 <style>
   :root{
     --bg:#0f1720; --card:#16212e; --line:#26384a; --txt:#e7eef6; --muted:#9fb2c6;
     --poptavka:#2563eb; --objednavka:#16a34a; --accent:#3b82f6; --head:#111c28; --title:#142433;
-    --pos:#16a34a; --neg:#ef4444;
+    --pos:#16a34a; --neg:#ef4444; --edit:#0c131b;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
@@ -21,21 +21,22 @@
   .btn{background:#1f2d3d;color:var(--txt);border:1px solid var(--line);border-radius:8px;
        padding:7px 12px;font-size:13px;cursor:pointer}
   .btn:active{transform:translateY(1px)}
-  #search{background:#0c131b;border:1px solid var(--line);color:var(--txt);border-radius:8px;
-          padding:8px 12px;font-size:14px;width:100%;max-width:340px}
-  .wrap{padding:12px 14px 60px;max-width:1200px;margin:0 auto}
-  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
-  .legend{font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
-         color:#fff;white-space:nowrap;vertical-align:middle}
+  .ctrl{background:var(--edit);border:1px solid var(--line);color:var(--txt);border-radius:8px;
+        padding:8px 12px;font-size:14px}
+  #search{flex:1;min-width:180px;max-width:340px}
+  .wrap{padding:12px 14px 60px;max-width:1280px;margin:0 auto}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{background:var(--edit);color:var(--muted);border:0;padding:8px 12px;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap;vertical-align:middle}
   .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)}
   .stavba{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
   .stavba .title{padding:12px 14px;border-bottom:1px solid var(--line);background:var(--title)}
   .stavba .title .nazev{font-size:18px;font-weight:800;letter-spacing:.4px}
   .stavba .title .info{font-size:12px;color:var(--muted);margin-top:3px}
-  .stavba .title .uspora{font-size:12px;color:var(--muted);margin-top:4px}
   .tbl-scroll{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:1040px}
   th,td{padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;text-align:left}
   th:last-child,td:last-child{border-right:none}
   thead th{font-size:11px;color:var(--muted);background:var(--head);text-align:center;font-weight:700}
@@ -43,11 +44,14 @@
   td.komodita{font-weight:700;white-space:nowrap}
   td.c{text-align:center;white-space:nowrap}
   td.cena{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-  td.pozn{color:var(--muted);font-size:12px;min-width:220px}
+  td.pozn{color:var(--muted);font-size:12px;min-width:200px}
   .uspora-pos{color:var(--pos)} .uspora-neg{color:var(--neg)}
   tr:last-child td{border-bottom:none}
+  textarea.note{width:100%;min-width:170px;min-height:34px;background:var(--edit);color:var(--txt);
+    border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:inherit;font-size:12px;resize:vertical}
+  textarea.note:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+  .note-status{font-size:10px;color:var(--muted);height:12px}
   .empty{color:var(--muted);font-size:13px;padding:14px}
-  /* login */
   #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
   #gate .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:340px}
   #gate h2{margin:0 0 4px;font-size:18px}
@@ -64,7 +68,7 @@
 <div id="gate">
   <div class="box">
     <h2>Poptávky a objednávky</h2>
-    <p>M-SILNICE OZ Jih — přihlášení</p>
+    <p>M - SILNICE a.s. · OZ Jih — přihlášení</p>
     <input id="g-email" type="email" placeholder="e-mail" autocomplete="username">
     <input id="g-pass" type="password" placeholder="heslo" autocomplete="current-password">
     <button class="btn" id="g-login">Přihlásit</button>
@@ -72,12 +76,12 @@
   </div>
 </div>
 
-<div id="demo" class="demo-bar hidden">UKÁZKOVÝ REŽIM — data jsou demo (otevřeno s ?demo).</div>
+<div id="demo" class="demo-bar hidden">UKÁZKOVÝ REŽIM — data jsou demo, poznámky se neukládají.</div>
 
 <header class="hidden" id="topbar">
   <div>
     <h1>Poptávky a objednávky</h1>
-    <div class="sub" id="updated">M-SILNICE OZ Jih</div>
+    <div class="sub" id="updated">M - SILNICE a.s. · OZ Jih</div>
   </div>
   <div class="spacer"></div>
   <button class="btn" id="logout">Odhlásit</button>
@@ -85,10 +89,17 @@
 
 <div class="wrap hidden" id="app">
   <div class="toolbar">
-    <input id="search" placeholder="🔎 hledat (stavba, komodita, dodavatel…)">
-    <div class="legend">
-      <span><span class="badge b-pop">POPTÁVKA</span></span>
-      <span><span class="badge b-obj">OBJEDNÁVKA</span></span>
+    <input id="search" class="ctrl" placeholder="🔎 hledat…">
+    <select id="f-stavba" class="ctrl"><option value="">Všechny stavby</option></select>
+    <div class="seg" id="f-typ">
+      <button data-v="all" class="on">Vše</button>
+      <button data-v="pop">Poptávky</button>
+      <button data-v="obj">Objednávky</button>
+    </div>
+    <div class="seg" id="f-stav">
+      <button data-v="all" class="on">Vše</button>
+      <button data-v="obj">Objednáno</button>
+      <button data-v="ceka">Čeká</button>
     </div>
   </div>
   <div id="list"></div>
@@ -109,31 +120,30 @@ var FIREBASE_CONFIG = {
   appId: "1:418167107219:web:225bafe8e9b79636cca766"
 };
 
-/* Demo data ve votickém formátu (náhled vzhledu; otevři index.html?demo=1) */
 var DEMO = {
   meta:{updatedAt:"16.6.2026 (demo)"},
   stavby:[
    {nazev:"„II/603 SULICE – ŽELIVEC, REKONSTRUKCE SILNICE A MOSTŮ\"",
     info:"Začátek 11.5.2026 · 15 měsíců · 2 sezony (2026: SO 101–104, 2027: SO 105–107)",
     polozky:[
-     {komodita:"Dopravní značení",typ:"POPTÁVKA",kolo1:"4.6.",poznamka:"Aktualizace CN (interně). Termín CN do 8.6.2026. Příloha: Sulice_DZ poptavkova.xlsx"},
-     {komodita:"Žulové kostky",typ:"POPTÁVKA",kolo1:"16.6.",poznamka:"CN poptána u CZ ZULA (obchod@czzula.cz). Termín do 20.6.2026. Příloha: Žádost o CN - Sulice - kostky.xlsx"},
-     {komodita:"Krajnice",typ:"OBJEDNÁVKA",kolo1:"16.6.",vitez:"DOKR NB",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"Objednávka odeslána 16.6., čeká se na podpis (dokrnb@seznam.cz)."}
+     {komodita:"Dopravní značení",typ:"POPTÁVKA",kolo1:"4.6.",poznamka:"Aktualizace CN (interně). Termín CN do 8.6.2026."},
+     {komodita:"Žulové kostky",typ:"POPTÁVKA",kolo1:"16.6.",poznamka:"CN poptána u CZ ZULA. Termín do 20.6.2026."},
+     {komodita:"Krajnice",typ:"OBJEDNÁVKA",kolo1:"16.6.",vitez:"DOKR NB",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"Objednávka odeslána, čeká se na podpis."}
     ]},
    {nazev:"„D4 PHS MNÍŠEK POD BRDY\"",info:"Protihluková stěna",
     polozky:[
-     {komodita:"Beton",typ:"OBJEDNÁVKA",kolo1:"26.5.",vitez:"PROTEKO",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"proteko@email.cz. Příloha: OBJ ...PROTEKO_beton.pdf"},
-     {komodita:"Dlažba",typ:"OBJEDNÁVKA",kolo1:"21.5.",vitez:"Stavebniny DEK",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"242 m² zámková dlažba + obrubníky (martin.rosa@dek-cz.com). Příloha: OBJ ...DEK_dlazba.pdf"}
+     {komodita:"Beton",typ:"OBJEDNÁVKA",kolo1:"26.5.",vitez:"PROTEKO",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"OBJ ...PROTEKO_beton.pdf"},
+     {komodita:"Dlažba",typ:"OBJEDNÁVKA",kolo1:"21.5.",vitez:"Stavebniny DEK",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"242 m² dlažba + obrubníky."}
     ]},
    {nazev:"„PERI – JESENICE U PRAHY\"",info:"Začátek realizace: 2. polovina června 2026",
     polozky:[
-     {komodita:"Elektroinstalace",typ:"POPTÁVKA",kolo1:"20.5.",poznamka:"VO, NN rozvody, revize, zemní práce. Termín CN do 25.5.2026. Přílohy: xlsx + 2 PDF."},
-     {komodita:"Montáž ORL + zprovoznění",typ:"POPTÁVKA",kolo1:"28.5.",poznamka:"Odlučovač ASIO AS TOP 80. Začátek červenec 2026. Přílohy: 4 PDF."},
-     {komodita:"Oplocení",typ:"POPTÁVKA",kolo1:"21.5.",poznamka:"Demontáž + montáž oplocení. Termín CN do 27.5.2026. Přílohy: 2 PDF + xlsx."}
+     {komodita:"Elektroinstalace",typ:"POPTÁVKA",kolo1:"20.5.",poznamka:"VO, NN rozvody, revize. Termín CN do 25.5.2026."},
+     {komodita:"Montáž ORL + zprovoznění",typ:"POPTÁVKA",kolo1:"28.5.",poznamka:"Odlučovač ASIO AS TOP 80."},
+     {komodita:"Oplocení",typ:"POPTÁVKA",kolo1:"21.5.",poznamka:"Demontáž + montáž oplocení. Termín CN do 27.5.2026."}
     ]},
    {nazev:"„II/101 DOLNÍ BŘEŽANY – ZBRASLAV\"",info:"",
     polozky:[
-     {komodita:"Dočasné štětovnice",typ:"POPTÁVKA",kolo1:"21.5.",poznamka:"Pronájem štětovnic, pažení 5 jam ~6 měsíců. Začátek do konce května. Příloha: NÁVRH ŠTĚTOVNIC.pdf"}
+     {komodita:"Dočasné štětovnice",typ:"POPTÁVKA",kolo1:"21.5.",poznamka:"Pronájem štětovnic, pažení 5 jam ~6 měsíců."}
     ]}
   ]
 };
@@ -145,68 +155,100 @@ function isPlaceholder(){return !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKe
 var DEMO_MODE = isPlaceholder() || /[?&]demo/.test(location.search)
   || location.hostname==='localhost' || location.hostname==='127.0.0.1';
 
-var DATA = {meta:{},stavby:[]};
+var DATA = {meta:{},stavby:[],poznamky:{}};
+var FILTER = {q:'',stavba:'',typ:'all',stav:'all'};
+var db=null, auth=null;
 
-// číslo → "1 234,56" (nebo prázdné)
 function fmtNum(v){
   if(v===''||v==null) return '';
-  var n = (typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));
-  if(isNaN(n)) return esc(v); // necelé číslo (např. "zbv") necháme jak je
+  var n=(typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));
+  if(isNaN(n)) return esc(v);
   return n.toLocaleString('cs-CZ',{minimumFractionDigits:0,maximumFractionDigits:2});
 }
 function toNum(v){var n=(typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+function isObj(p){return (p.typ||'').toUpperCase().indexOf('OBJ')===0;}
+// stabilní klíč poznámky (přežije přepis dat z Excelu)
+function noteKey(nazev,komodita){
+  return (String(nazev)+'__'+String(komodita)).replace(/[.$#\[\]\/\x00-\x1f]+/g,'_').replace(/\s+/g,'_').slice(0,180);
+}
+
+function buildStavbaFilter(){
+  var sel=$('f-stavba'); var cur=sel.value;
+  var opts='<option value="">Všechny stavby</option>';
+  (DATA.stavby||[]).forEach(function(s,i){
+    var nm=(s.nazev||'').replace(/[„""]/g,'').trim();
+    opts+='<option value="'+i+'">'+esc(nm)+'</option>';
+  });
+  sel.innerHTML=opts; sel.value=cur;
+}
 
 function render(){
-  var q=($('search').value||'').trim().toLowerCase();
+  var q=FILTER.q.trim().toLowerCase();
   var html='';
-  (DATA.stavby||[]).forEach(function(s){
+  (DATA.stavby||[]).forEach(function(s,si){
+    if(FILTER.stavba!=='' && String(si)!==FILTER.stavba) return;
     var rows='';
     (s.polozky||[]).forEach(function(p){
+      var objedn=isObj(p);
+      if(FILTER.typ==='pop' && objedn) return;
+      if(FILTER.typ==='obj' && !objedn) return;
+      var jeObjednano=(String(p.objednano||'').toUpperCase().indexOf('ANO')===0);
+      if(FILTER.stav==='obj' && !jeObjednano) return;
+      if(FILTER.stav==='ceka' && jeObjednano) return;
       var hay=(s.nazev+' '+(p.komodita||'')+' '+(p.vitez||'')+' '+(p.poznamka||'')).toLowerCase();
       if(q && hay.indexOf(q)===-1) return;
-      var bcls=(p.typ||'').toUpperCase().indexOf('OBJ')===0?'b-obj':'b-pop';
-      var btxt=(p.typ||'').toUpperCase().indexOf('OBJ')===0?'OBJ':'POP';
+      var bcls=objedn?'b-obj':'b-pop', btxt=objedn?'OBJ':'POP';
       var nN=toNum(p.cenaNakladova), nV=toNum(p.cenaVysoutezena), us='';
       if(nN!=null && nV!=null){var d=nN-nV;us='<span class="'+(d>=0?'uspora-pos':'uspora-neg')+'">'+fmtNum(d)+'</span>';}
+      var key=noteKey(s.nazev,p.komodita);
+      var mojePozn=(DATA.poznamky&&DATA.poznamky[key])?DATA.poznamky[key]:'';
       rows+='<tr>'
         +'<td class="komodita"><span class="badge '+bcls+'">'+btxt+'</span> '+esc(p.komodita)+'</td>'
-        +'<td class="c">'+esc(p.kolo1)+'</td>'
-        +'<td class="c">'+esc(p.kolo2)+'</td>'
-        +'<td class="c">'+esc(p.kolo3)+'</td>'
-        +'<td class="c">'+esc(p.vitez)+'</td>'
-        +'<td class="c">'+esc(p.zasmluvneni)+'</td>'
-        +'<td class="c">'+esc(p.objednano)+'</td>'
-        +'<td class="cena">'+fmtNum(p.cenaNakladova)+'</td>'
-        +'<td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td>'
-        +'<td class="cena">'+us+'</td>'
+        +'<td class="c">'+esc(p.kolo1)+'</td><td class="c">'+esc(p.kolo2)+'</td><td class="c">'+esc(p.kolo3)+'</td>'
+        +'<td class="c">'+esc(p.vitez)+'</td><td class="c">'+esc(p.zasmluvneni)+'</td><td class="c">'+esc(p.objednano)+'</td>'
+        +'<td class="cena">'+fmtNum(p.cenaNakladova)+'</td><td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td><td class="cena">'+us+'</td>'
         +'<td class="pozn">'+esc(p.poznamka)+'</td>'
+        +'<td><textarea class="note" data-key="'+esc(key)+'" placeholder="moje poznámka…">'+esc(mojePozn)+'</textarea>'
+        +'<div class="note-status" data-st="'+esc(key)+'"></div></td>'
         +'</tr>';
     });
     if(!rows) return;
     html+='<div class="stavba"><div class="title">'
       +'<div class="nazev">'+esc(s.nazev)+'</div>'
       +(s.info?'<div class="info">'+esc(s.info)+'</div>':'')
-      +'</div><div class="tbl-scroll"><table>'
-      +'<thead>'
+      +'</div><div class="tbl-scroll"><table><thead>'
       +'<tr class="grp"><th rowspan="2">Komodita</th><th colspan="3">Výběrové řízení</th>'
       +'<th rowspan="2">Vítěz</th><th rowspan="2">Zasmluvnění</th><th rowspan="2">Objednáno</th>'
-      +'<th colspan="3">Cena</th><th rowspan="2">Poznámka</th></tr>'
+      +'<th colspan="3">Cena</th><th rowspan="2">Poznámka</th><th rowspan="2">Moje poznámka</th></tr>'
       +'<tr><th>1. kolo</th><th>2. kolo</th><th>3. kolo</th><th>Nákladová</th><th>Vysoutěžená</th><th>Úspora</th></tr>'
       +'</thead><tbody>'+rows+'</tbody></table></div></div>';
   });
-  $('list').innerHTML=html||'<div class="empty">Nic nenalezeno.</div>';
-  $('updated').textContent='M-SILNICE OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
+  $('list').innerHTML=html||'<div class="empty">Nic neodpovídá filtru.</div>';
+  $('updated').textContent='M - SILNICE a.s. · OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
+}
+
+// uložení vlastní poznámky
+function saveNote(key, val, statusEl){
+  if(DATA.poznamky) DATA.poznamky[key]=val;
+  if(db){
+    if(statusEl) statusEl.textContent='ukládám…';
+    var ref=db.ref('/poznamky/'+key);
+    var p = val ? ref.set(val) : ref.remove();
+    p.then(function(){ if(statusEl){statusEl.textContent='✓ uloženo';setTimeout(function(){statusEl.textContent='';},1500);} })
+     .catch(function(){ if(statusEl) statusEl.textContent='chyba ukládání'; });
+  }
 }
 
 function showApp(){
   $('gate').classList.add('hidden');
   $('topbar').classList.remove('hidden');
   $('app').classList.remove('hidden');
+  buildStavbaFilter();
   render();
 }
 
 function normalize(raw){
-  var out={meta:(raw&&raw.meta)||{},stavby:[]};
+  var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(raw&&raw.poznamky)||{}};
   var sv=(raw&&raw.stavby)||{};
   Object.keys(sv).forEach(function(k){var s=sv[k];s._k=k;out.stavby.push(s);});
   out.stavby.sort(function(a,b){return (a.poradi||0)-(b.poradi||0);});
@@ -217,14 +259,31 @@ function normalize(raw){
   return out;
 }
 
-$('search').addEventListener('input',render);
+// ── ovládání filtrů ──
+$('search').addEventListener('input',function(){FILTER.q=this.value;render();});
+$('f-stavba').addEventListener('change',function(){FILTER.stavba=this.value;render();});
+function segHandler(id,prop){
+  $(id).addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    FILTER[prop]=b.getAttribute('data-v');
+    [].forEach.call(this.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);});
+    render();
+  });
+}
+segHandler('f-typ','typ'); segHandler('f-stav','stav');
+// delegovaný handler pro ukládání poznámek (change = po opuštění pole)
+$('list').addEventListener('change',function(e){
+  var t=e.target; if(t&&t.classList.contains('note')){
+    saveNote(t.getAttribute('data-key'), t.value.trim(), document.querySelector('[data-st="'+t.getAttribute('data-key')+'"]'));
+  }
+});
 
 if(DEMO_MODE){
   $('demo').classList.remove('hidden');
-  DATA=DEMO; showApp(); $('logout').classList.add('hidden');
+  DATA=DEMO; DATA.poznamky=DATA.poznamky||{}; showApp(); $('logout').classList.add('hidden');
 } else {
   firebase.initializeApp(FIREBASE_CONFIG);
-  var auth=firebase.auth(), db=firebase.database();
+  auth=firebase.auth(); db=firebase.database();
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   $('g-login').addEventListener('click',function(){
     $('g-err').textContent='';
