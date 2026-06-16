@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poptávky a objednávky — M-SILNICE OZ Jih</title>
+<style>
+  :root{
+    --bg:#0f1720; --card:#16212e; --line:#26384a; --txt:#e7eef6; --muted:#9fb2c6;
+    --poptavka:#2563eb; --objednavka:#16a34a; --accent:#3b82f6; --head:#111c28; --title:#142433;
+    --pos:#16a34a; --neg:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--txt);-webkit-text-size-adjust:100%}
+  header{position:sticky;top:0;z-index:5;background:#0c131b;border-bottom:1px solid var(--line);
+         padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  header h1{font-size:16px;margin:0;font-weight:700;line-height:1.2}
+  header .sub{font-size:11px;color:var(--muted)}
+  header .spacer{flex:1}
+  .btn{background:#1f2d3d;color:var(--txt);border:1px solid var(--line);border-radius:8px;
+       padding:7px 12px;font-size:13px;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  #search{background:#0c131b;border:1px solid var(--line);color:var(--txt);border-radius:8px;
+          padding:8px 12px;font-size:14px;width:100%;max-width:340px}
+  .wrap{padding:12px 14px 60px;max-width:1200px;margin:0 auto}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
+  .legend{font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+         color:#fff;white-space:nowrap;vertical-align:middle}
+  .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)}
+  .stavba{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+  .stavba .title{padding:12px 14px;border-bottom:1px solid var(--line);background:var(--title)}
+  .stavba .title .nazev{font-size:18px;font-weight:800;letter-spacing:.4px}
+  .stavba .title .info{font-size:12px;color:var(--muted);margin-top:3px}
+  .stavba .title .uspora{font-size:12px;color:var(--muted);margin-top:4px}
+  .tbl-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;text-align:left}
+  th:last-child,td:last-child{border-right:none}
+  thead th{font-size:11px;color:var(--muted);background:var(--head);text-align:center;font-weight:700}
+  thead tr.grp th{text-transform:uppercase;letter-spacing:.5px}
+  td.komodita{font-weight:700;white-space:nowrap}
+  td.c{text-align:center;white-space:nowrap}
+  td.cena{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.pozn{color:var(--muted);font-size:12px;min-width:220px}
+  .uspora-pos{color:var(--pos)} .uspora-neg{color:var(--neg)}
+  tr:last-child td{border-bottom:none}
+  .empty{color:var(--muted);font-size:13px;padding:14px}
+  /* login */
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+  #gate .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:340px}
+  #gate h2{margin:0 0 4px;font-size:18px}
+  #gate p{margin:0 0 16px;color:var(--muted);font-size:13px}
+  #gate input{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:9px;border:1px solid var(--line);background:#0c131b;color:var(--txt);font-size:15px}
+  #gate .btn{width:100%;background:var(--accent);border-color:var(--accent);font-weight:700;padding:11px}
+  #gate .err{color:#f87171;font-size:13px;min-height:18px;margin-top:6px}
+  .hidden{display:none!important}
+  .demo-bar{background:#7c3a02;color:#ffd9a8;font-size:12px;text-align:center;padding:6px}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <h2>Poptávky a objednávky</h2>
+    <p>M-SILNICE OZ Jih — přihlášení</p>
+    <input id="g-email" type="email" placeholder="e-mail" autocomplete="username">
+    <input id="g-pass" type="password" placeholder="heslo" autocomplete="current-password">
+    <button class="btn" id="g-login">Přihlásit</button>
+    <div class="err" id="g-err"></div>
+  </div>
+</div>
+
+<div id="demo" class="demo-bar hidden">UKÁZKOVÝ REŽIM — data jsou demo (otevřeno s ?demo).</div>
+
+<header class="hidden" id="topbar">
+  <div>
+    <h1>Poptávky a objednávky</h1>
+    <div class="sub" id="updated">M-SILNICE OZ Jih</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" id="logout">Odhlásit</button>
+</header>
+
+<div class="wrap hidden" id="app">
+  <div class="toolbar">
+    <input id="search" placeholder="🔎 hledat (stavba, komodita, dodavatel…)">
+    <div class="legend">
+      <span><span class="badge b-pop">POPTÁVKA</span></span>
+      <span><span class="badge b-obj">OBJEDNÁVKA</span></span>
+    </div>
+  </div>
+  <div id="list"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ════ KONFIGURACE FIREBASE ════ */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA_9Zm7J_iDVkcfF3MAWoSMEtJipBkIAo0",
+  authDomain: "poptavky-objednavky.firebaseapp.com",
+  databaseURL: "https://poptavky-objednavky-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "poptavky-objednavky",
+  storageBucket: "poptavky-objednavky.firebasestorage.app",
+  messagingSenderId: "418167107219",
+  appId: "1:418167107219:web:225bafe8e9b79636cca766"
+};
+
+/* Demo data ve votickém formátu (náhled vzhledu; otevři index.html?demo=1) */
+var DEMO = {
+  meta:{updatedAt:"16.6.2026 (demo)"},
+  stavby:[
+   {nazev:"„II/603 SULICE – ŽELIVEC, REKONSTRUKCE SILNICE A MOSTŮ\"",
+    info:"Začátek 11.5.2026 · 15 měsíců · 2 sezony (2026: SO 101–104, 2027: SO 105–107)",
+    polozky:[
+     {komodita:"Dopravní značení",typ:"POPTÁVKA",kolo1:"4.6.",poznamka:"Aktualizace CN (interně). Termín CN do 8.6.2026. Příloha: Sulice_DZ poptavkova.xlsx"},
+     {komodita:"Žulové kostky",typ:"POPTÁVKA",kolo1:"16.6.",poznamka:"CN poptána u CZ ZULA (obchod@czzula.cz). Termín do 20.6.2026. Příloha: Žádost o CN - Sulice - kostky.xlsx"},
+     {komodita:"Krajnice",typ:"OBJEDNÁVKA",kolo1:"16.6.",vitez:"DOKR NB",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"Objednávka odeslána 16.6., čeká se na podpis (dokrnb@seznam.cz)."}
+    ]},
+   {nazev:"„D4 PHS MNÍŠEK POD BRDY\"",info:"Protihluková stěna",
+    polozky:[
+     {komodita:"Beton",typ:"OBJEDNÁVKA",kolo1:"26.5.",vitez:"PROTEKO",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"proteko@email.cz. Příloha: OBJ ...PROTEKO_beton.pdf"},
+     {komodita:"Dlažba",typ:"OBJEDNÁVKA",kolo1:"21.5.",vitez:"Stavebniny DEK",zasmluvneni:"Objednávka",objednano:"ANO",poznamka:"242 m² zámková dlažba + obrubníky (martin.rosa@dek-cz.com). Příloha: OBJ ...DEK_dlazba.pdf"}
+    ]},
+   {nazev:"„PERI – JESENICE U PRAHY\"",info:"Začátek realizace: 2. polovina června 2026",
+    polozky:[
+     {komodita:"Elektroinstalace",typ:"POPTÁVKA",kolo1:"20.5.",poznamka:"VO, NN rozvody, revize, zemní práce. Termín CN do 25.5.2026. Přílohy: xlsx + 2 PDF."},
+     {komodita:"Montáž ORL + zprovoznění",typ:"POPTÁVKA",kolo1:"28.5.",poznamka:"Odlučovač ASIO AS TOP 80. Začátek červenec 2026. Přílohy: 4 PDF."},
+     {komodita:"Oplocení",typ:"POPTÁVKA",kolo1:"21.5.",poznamka:"Demontáž + montáž oplocení. Termín CN do 27.5.2026. Přílohy: 2 PDF + xlsx."}
+    ]},
+   {nazev:"„II/101 DOLNÍ BŘEŽANY – ZBRASLAV\"",info:"",
+    polozky:[
+     {komodita:"Dočasné štětovnice",typ:"POPTÁVKA",kolo1:"21.5.",poznamka:"Pronájem štětovnic, pažení 5 jam ~6 měsíců. Začátek do konce května. Příloha: NÁVRH ŠTĚTOVNIC.pdf"}
+    ]}
+  ]
+};
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function isPlaceholder(){return !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.indexOf('PLACEHOLDER')!==-1;}
+var DEMO_MODE = isPlaceholder() || /[?&]demo/.test(location.search)
+  || location.hostname==='localhost' || location.hostname==='127.0.0.1';
+
+var DATA = {meta:{},stavby:[]};
+
+// číslo → "1 234,56" (nebo prázdné)
+function fmtNum(v){
+  if(v===''||v==null) return '';
+  var n = (typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));
+  if(isNaN(n)) return esc(v); // necelé číslo (např. "zbv") necháme jak je
+  return n.toLocaleString('cs-CZ',{minimumFractionDigits:0,maximumFractionDigits:2});
+}
+function toNum(v){var n=(typeof v==='number')?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+
+function render(){
+  var q=($('search').value||'').trim().toLowerCase();
+  var html='';
+  (DATA.stavby||[]).forEach(function(s){
+    var rows='';
+    (s.polozky||[]).forEach(function(p){
+      var hay=(s.nazev+' '+(p.komodita||'')+' '+(p.vitez||'')+' '+(p.poznamka||'')).toLowerCase();
+      if(q && hay.indexOf(q)===-1) return;
+      var bcls=(p.typ||'').toUpperCase().indexOf('OBJ')===0?'b-obj':'b-pop';
+      var btxt=(p.typ||'').toUpperCase().indexOf('OBJ')===0?'OBJ':'POP';
+      var nN=toNum(p.cenaNakladova), nV=toNum(p.cenaVysoutezena), us='';
+      if(nN!=null && nV!=null){var d=nN-nV;us='<span class="'+(d>=0?'uspora-pos':'uspora-neg')+'">'+fmtNum(d)+'</span>';}
+      rows+='<tr>'
+        +'<td class="komodita"><span class="badge '+bcls+'">'+btxt+'</span> '+esc(p.komodita)+'</td>'
+        +'<td class="c">'+esc(p.kolo1)+'</td>'
+        +'<td class="c">'+esc(p.kolo2)+'</td>'
+        +'<td class="c">'+esc(p.kolo3)+'</td>'
+        +'<td class="c">'+esc(p.vitez)+'</td>'
+        +'<td class="c">'+esc(p.zasmluvneni)+'</td>'
+        +'<td class="c">'+esc(p.objednano)+'</td>'
+        +'<td class="cena">'+fmtNum(p.cenaNakladova)+'</td>'
+        +'<td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td>'
+        +'<td class="cena">'+us+'</td>'
+        +'<td class="pozn">'+esc(p.poznamka)+'</td>'
+        +'</tr>';
+    });
+    if(!rows) return;
+    html+='<div class="stavba"><div class="title">'
+      +'<div class="nazev">'+esc(s.nazev)+'</div>'
+      +(s.info?'<div class="info">'+esc(s.info)+'</div>':'')
+      +'</div><div class="tbl-scroll"><table>'
+      +'<thead>'
+      +'<tr class="grp"><th rowspan="2">Komodita</th><th colspan="3">Výběrové řízení</th>'
+      +'<th rowspan="2">Vítěz</th><th rowspan="2">Zasmluvnění</th><th rowspan="2">Objednáno</th>'
+      +'<th colspan="3">Cena</th><th rowspan="2">Poznámka</th></tr>'
+      +'<tr><th>1. kolo</th><th>2. kolo</th><th>3. kolo</th><th>Nákladová</th><th>Vysoutěžená</th><th>Úspora</th></tr>'
+      +'</thead><tbody>'+rows+'</tbody></table></div></div>';
+  });
+  $('list').innerHTML=html||'<div class="empty">Nic nenalezeno.</div>';
+  $('updated').textContent='M-SILNICE OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
+}
+
+function showApp(){
+  $('gate').classList.add('hidden');
+  $('topbar').classList.remove('hidden');
+  $('app').classList.remove('hidden');
+  render();
+}
+
+function normalize(raw){
+  var out={meta:(raw&&raw.meta)||{},stavby:[]};
+  var sv=(raw&&raw.stavby)||{};
+  Object.keys(sv).forEach(function(k){var s=sv[k];s._k=k;out.stavby.push(s);});
+  out.stavby.sort(function(a,b){return (a.poradi||0)-(b.poradi||0);});
+  out.stavby.forEach(function(s){
+    var pl=s.polozky||[];
+    if(!Array.isArray(pl)){var arr=[];Object.keys(pl).forEach(function(k){arr.push(pl[k]);});s.polozky=arr;}
+  });
+  return out;
+}
+
+$('search').addEventListener('input',render);
+
+if(DEMO_MODE){
+  $('demo').classList.remove('hidden');
+  DATA=DEMO; showApp(); $('logout').classList.add('hidden');
+} else {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  var auth=firebase.auth(), db=firebase.database();
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  $('g-login').addEventListener('click',function(){
+    $('g-err').textContent='';
+    var e=$('g-email').value.trim(), p=$('g-pass').value;
+    if(!e||!p){$('g-err').textContent='Vyplň e-mail i heslo.';return;}
+    $('g-login').textContent='Přihlašuji…';
+    auth.signInWithEmailAndPassword(e,p).catch(function(){
+      $('g-login').textContent='Přihlásit';
+      $('g-err').textContent='Přihlášení selhalo. Zkontroluj e-mail a heslo.';
+    });
+  });
+  $('g-pass').addEventListener('keydown',function(ev){if(ev.key==='Enter')$('g-login').click();});
+  $('logout').addEventListener('click',function(){auth.signOut();});
+  auth.onAuthStateChanged(function(user){
+    if(user){
+      db.ref('/').on('value',function(snap){DATA=normalize(snap.val()||{});showApp();});
+    } else {
+      $('gate').classList.remove('hidden');
+      $('topbar').classList.add('hidden');
+      $('app').classList.add('hidden');
+      $('g-login').textContent='Přihlásit';
+    }
+  });
+}
+</script>
+</body>
+</html>
