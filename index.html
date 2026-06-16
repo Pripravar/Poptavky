@@ -47,6 +47,9 @@
   .zm{font-size:10px;color:var(--muted);font-weight:400;margin-top:2px}
   .rowbtn{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--txt);cursor:pointer;font-size:12px;padding:2px 6px;margin-right:4px}
   .rowbtn.del{color:var(--neg);border-color:transparent}
+  .rowbtn.star{border-color:transparent;color:var(--muted)} .rowbtn.star.on{color:#f5c518}
+  tr.dulezite td{box-shadow:inset 3px 0 0 #f5c518}
+  #f-dul.on{background:#f5c518;border-color:#f5c518;color:#1a1a1a;font-weight:700}
   .empty{color:var(--muted);font-size:13px;padding:14px}
   /* modal */
   #modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
@@ -92,6 +95,7 @@
     <div class="seg" id="f-typ"><button data-v="all" class="on">Vše</button><button data-v="pop">Poptávky</button><button data-v="obj">Objednávky</button><button data-v="sml">Smlouvy</button></div>
     <div class="seg" id="f-stav"><button data-v="all" class="on">Vše</button><button data-v="obj">Objednáno</button><button data-v="ceka">Čeká</button></div>
     <select id="f-sort" class="ctrl"><option value="">Řazení: výchozí</option><option value="cislo-asc">Číslo stavby ↑</option><option value="cislo-desc">Číslo stavby ↓</option><option value="abc-asc">Abecedně A→Z</option><option value="abc-desc">Abecedně Z→A</option></select>
+    <button id="f-dul" class="btn">★ Jen důležité</button>
   </div>
   <div id="list"></div>
 </div>
@@ -127,8 +131,8 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){retur
 function isPlaceholder(){return !FIREBASE_CONFIG.apiKey||FIREBASE_CONFIG.apiKey.indexOf('PLACEHOLDER')!==-1;}
 var DEMO_MODE=isPlaceholder()||/[?&]demo/.test(location.search)||location.hostname==='localhost'||location.hostname==='127.0.0.1';
 
-var DATA={meta:{},stavby:[],poznamky:{},upravy:{},rucni:{},stavby_extra:{}};
-var FILTER={q:'',stavba:'',typ:'all',stav:'all',sort:''};
+var DATA={meta:{},stavby:[],poznamky:{},upravy:{},rucni:{},stavby_extra:{},dulezite:{}};
+var FILTER={q:'',stavba:'',typ:'all',stav:'all',sort:'',dulezite:false};
 var db=null,auth=null,started=false,CTX=null;
 var FIELDS=['komodita','typ','kolo1','kolo2','kolo3','vitez','zasmluvneni','objednano','cenaNakladova','cenaVysoutezena','poznamka'];
 
@@ -160,10 +164,14 @@ function passFilter(nazev,p,cislo){var kind=typKind(p);
 function uspora(p){var nN=toNum(p.cenaNakladova),nV=toNum(p.cenaVysoutezena);if(nN!=null&&nV!=null){var d=nN-nV;return '<span class="'+(d>=0?'uspora-pos':'uspora-neg')+'">'+fmtNum(d)+'</span>';}return '';}
 
 function rowTr(mode,idkey,nazev,p,zm){
-  var note=(function(){var key=rowKey(nazev,p.komodita);return (DATA.poznamky&&DATA.poznamky[key])?DATA.poznamky[key]:'';})();
-  var btns='<button class="rowbtn" data-ed="'+mode+'|'+esc(idkey)+'" title="upravit">✏️</button>'+(mode==='r'?'<button class="rowbtn del" data-del="'+esc(idkey)+'" title="smazat">✕</button>':'');
+  var key=rowKey(nazev,p.komodita);
+  var dul=!!(DATA.dulezite&&DATA.dulezite[key]);
+  if(FILTER.dulezite&&!dul)return '';
+  var note=(DATA.poznamky&&DATA.poznamky[key])?DATA.poznamky[key]:'';
+  var star='<button class="rowbtn star'+(dul?' on':'')+'" data-star="'+esc(key)+'" title="důležité">'+(dul?'★':'☆')+'</button>';
+  var btns=star+'<button class="rowbtn" data-ed="'+mode+'|'+esc(idkey)+'" title="upravit">✏️</button>'+(mode==='r'?'<button class="rowbtn del" data-del="'+esc(idkey)+'" title="smazat">✕</button>':'');
   var zmh=zm?'<div class="zm">změněno '+esc(zm)+'</div>':'';
-  return '<tr'+(mode==='r'?' class="mrow"':'')+'><td class="komodita">'+btns+' '+badgeHtml(p)+' '+esc(p.komodita)+zmh+'</td>'
+  return '<tr class="'+(mode==='r'?'mrow ':'')+(dul?'dulezite':'')+'"><td class="komodita">'+btns+' '+badgeHtml(p)+' '+esc(p.komodita)+zmh+'</td>'
     +'<td class="c">'+esc(p.kolo1)+'</td><td class="c">'+esc(p.kolo2)+'</td><td class="c">'+esc(p.kolo3)+'</td>'
     +'<td class="c">'+esc(p.vitez)+'</td><td class="c">'+esc(p.zasmluvneni)+'</td><td class="c">'+esc(p.objednano)+'</td>'
     +'<td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td>'
@@ -238,7 +246,7 @@ function delRow(idkey){var pr=idkey.split('|'),sl=pr[0],id=pr[1];if(db)db.ref('/
 function editCislo(sl){var cur=cisloOf(sl);var v=prompt('Číslo stavby:',cur);if(v===null)return;v=v.trim();DATA.stavby_extra[sl]=DATA.stavby_extra[sl]||{};DATA.stavby_extra[sl].cislo=v;if(db)db.ref('/stavby_extra/'+sl+'/cislo').set(v);else render();}
 
 function showApp(){$('gate').classList.add('hidden');$('topbar').classList.remove('hidden');$('app').classList.remove('hidden');render();}
-function normalize(raw){var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(raw&&raw.poznamky)||{},upravy:(raw&&raw.upravy)||{},rucni:(raw&&raw.rucni)||{},stavby_extra:(raw&&raw.stavby_extra)||{}};
+function normalize(raw){var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(raw&&raw.poznamky)||{},upravy:(raw&&raw.upravy)||{},rucni:(raw&&raw.rucni)||{},stavby_extra:(raw&&raw.stavby_extra)||{},dulezite:(raw&&raw.dulezite)||{}};
   var sv=(raw&&raw.stavby)||{};Object.keys(sv).forEach(function(k){var s=sv[k];s._k=k;out.stavby.push(s);});
   out.stavby.sort(function(a,b){return (a.poradi||0)-(b.poradi||0);});
   out.stavby.forEach(function(s){var pl=s.polozky||[];if(!Array.isArray(pl)){var arr=[];Object.keys(pl).forEach(function(k){arr.push(pl[k]);});s.polozky=arr;}});return out;}
@@ -253,7 +261,10 @@ $('list').addEventListener('click',function(e){
   var ad=e.target.closest('[data-add]'); if(ad){openNew(ad.getAttribute('data-add'));return;}
   var dl=e.target.closest('[data-del]'); if(dl){if(confirm('Smazat tento řádek?'))delRow(dl.getAttribute('data-del'));return;}
   var ci=e.target.closest('[data-cislo]'); if(ci){editCislo(ci.getAttribute('data-cislo'));return;}
+  var st=e.target.closest('[data-star]'); if(st){toggleDul(st.getAttribute('data-star'));return;}
 });
+function toggleDul(key){DATA.dulezite=DATA.dulezite||{};if(DATA.dulezite[key]){delete DATA.dulezite[key];if(db)db.ref('/dulezite/'+key).remove();else render();}else{DATA.dulezite[key]=true;if(db)db.ref('/dulezite/'+key).set(true);else render();}}
+$('f-dul').addEventListener('click',function(){FILTER.dulezite=!FILTER.dulezite;this.classList.toggle('on',FILTER.dulezite);render();});
 $('m-cancel').addEventListener('click',closeModal);
 $('m-save').addEventListener('click',saveModal);
 $('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
