@@ -165,7 +165,7 @@ function rowTr(mode,idkey,nazev,p,zm){
   return '<tr'+(mode==='r'?' class="mrow"':'')+'><td class="komodita">'+btns+' '+badgeHtml(p)+' '+esc(p.komodita)+zmh+'</td>'
     +'<td class="c">'+esc(p.kolo1)+'</td><td class="c">'+esc(p.kolo2)+'</td><td class="c">'+esc(p.kolo3)+'</td>'
     +'<td class="c">'+esc(p.vitez)+'</td><td class="c">'+esc(p.zasmluvneni)+'</td><td class="c">'+esc(p.objednano)+'</td>'
-    +'<td class="cena">'+fmtNum(p.cenaNakladova)+'</td><td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td><td class="cena">'+uspora(p)+'</td>'
+    +'<td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td>'
     +'<td class="pozn">'+esc(p.poznamka)+(note?'<div class="zm">📝 '+esc(note)+'</div>':'')+'</td></tr>';
 }
 
@@ -183,9 +183,9 @@ function render(){
       +'<div class="cislo">č. stavby: <b>'+(c?esc(c):'—')+'</b> <button class="rowbtn" data-cislo="'+esc(sl)+'" title="upravit číslo">✏️</button></div>'
       +'<button class="btn btn-add" data-add="'+esc(sl)+'">+ řádek</button></div>'
       +'<div class="tbl-scroll"><table><thead>'
-      +'<tr class="grp"><th rowspan="2">Komodita</th><th colspan="3">Výběrové řízení</th><th rowspan="2">Vítěz</th><th rowspan="2">Zasmluvnění</th><th rowspan="2">Objednáno</th><th colspan="3">Cena</th><th rowspan="2">Poznámka</th></tr>'
-      +'<tr><th>1. kolo</th><th>2. kolo</th><th>3. kolo</th><th>Nákladová</th><th>Vysoutěžená</th><th>Úspora</th></tr>'
-      +'</thead><tbody>'+(rows||'<tr><td colspan="11" class="empty">Žádné položky (filtr nebo zatím prázdné).</td></tr>')+'</tbody></table></div></div>';
+      +'<tr class="grp"><th rowspan="2">Komodita</th><th colspan="3">Výběrové řízení</th><th rowspan="2">Vítěz</th><th rowspan="2">Zasmluvnění</th><th rowspan="2">Objednáno</th><th rowspan="2">Cena</th><th rowspan="2">Poznámka</th></tr>'
+      +'<tr><th>1. kolo</th><th>2. kolo</th><th>3. kolo</th></tr>'
+      +'</thead><tbody>'+(rows||'<tr><td colspan="9" class="empty">Žádné položky (filtr nebo zatím prázdné).</td></tr>')+'</tbody></table></div></div>';
   });
   $('list').innerHTML=html||'<div class="empty">Nic neodpovídá filtru.</div>';
   $('updated').textContent='M - SILNICE a.s. · OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
