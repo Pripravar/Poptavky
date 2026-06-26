@@ -19,7 +19,11 @@
   .ctrl{background:var(--edit);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 12px;font-size:14px}
   #search{flex:1;min-width:160px;max-width:300px}
   .wrap{padding:12px 14px 60px;max-width:1280px;margin:0 auto}
-  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 0;border-bottom:1px solid var(--line);margin-bottom:14px;-webkit-overflow-scrolling:touch}
+  .tabs button{flex:0 0 auto;background:var(--card);color:var(--muted);border:1px solid var(--line);border-bottom:none;border-radius:10px 10px 0 0;padding:9px 14px;font-size:13px;cursor:pointer;white-space:nowrap}
+  .tabs button.on{background:var(--title);color:var(--txt);font-weight:700}
+  .tabs .tnum{color:var(--muted);font-weight:400;font-size:11px;margin-left:5px}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .seg button{background:var(--edit);color:var(--muted);border:0;padding:8px 12px;font-size:13px;cursor:pointer}
   .seg button.on{background:var(--accent);color:#fff;font-weight:700}
@@ -90,13 +94,13 @@
 
 <div class="wrap hidden" id="app">
   <div class="toolbar">
-    <input id="search" class="ctrl" placeholder="🔎 hledat…">
-    <select id="f-stavba" class="ctrl"><option value="">Všechny stavby</option></select>
+    <input id="search" class="ctrl" placeholder="🔎 hledat (napříč stavbami)…">
     <div class="seg" id="f-typ"><button data-v="all" class="on">Vše</button><button data-v="pop">Poptávky</button><button data-v="obj">Objednávky</button><button data-v="sml">Smlouvy</button></div>
     <div class="seg" id="f-stav"><button data-v="all" class="on">Vše</button><button data-v="obj">Objednáno</button><button data-v="ceka">Čeká</button></div>
     <select id="f-sort" class="ctrl"><option value="">Řazení: výchozí</option><option value="cislo-asc">Číslo stavby ↑</option><option value="cislo-desc">Číslo stavby ↓</option><option value="abc-asc">Abecedně A→Z</option><option value="abc-desc">Abecedně Z→A</option></select>
     <button id="f-dul" class="btn">★ Jen důležité</button>
   </div>
+  <div id="tabs" class="tabs"></div>
   <div id="list"></div>
 </div>
 
@@ -179,18 +183,24 @@ function rowTr(mode,idkey,nazev,p,zm){
 }
 
 function render(){
-  buildStavbaFilter();
-  var html='';
+  var html='', tabs='';
   var stavbyList=(DATA.stavby||[]).slice();
   if(FILTER.sort==='cislo-asc'||FILTER.sort==='cislo-desc'){stavbyList.sort(function(a,b){return String(cisloOf(slug(a.nazev))).localeCompare(String(cisloOf(slug(b.nazev))),'cs',{numeric:true});});if(FILTER.sort==='cislo-desc')stavbyList.reverse();}
   else if(FILTER.sort==='abc-asc'||FILTER.sort==='abc-desc'){stavbyList.sort(function(a,b){return String(a.nazev||'').localeCompare(String(b.nazev||''),'cs');});if(FILTER.sort==='abc-desc')stavbyList.reverse();}
+  var slugs=stavbyList.map(function(s){return slug(s.nazev);});
+  if(slugs.indexOf(FILTER.stavba)===-1)FILTER.stavba=slugs.length?slugs[0]:'';
+  var searching=FILTER.q.trim()!=='';
+  stavbyList.forEach(function(s){var sl=slug(s.nazev);var nm=(s.nazev||'').replace(/[„“”]/g,'').trim();var c=cisloOf(sl);
+    tabs+='<button data-tab="'+esc(sl)+'"'+(sl===FILTER.stavba?' class="on"':'')+'>'+esc(nm)+(c?'<span class="tnum">'+esc(c)+'</span>':'')+'</button>';});
+  $('tabs').innerHTML=tabs;
   stavbyList.forEach(function(s){
     var sl=slug(s.nazev);
-    if(FILTER.stavba!==''&&FILTER.stavba!==sl)return;
+    if(!searching && sl!==FILTER.stavba)return;
     var cislo=cisloOf(sl),rows='',mk={};
     (s.polozky||[]).forEach(function(p0){var p=eff(s.nazev,p0);mk[(p.komodita||'').toLowerCase()]=1;if(passFilter(s.nazev,p,cislo))rows+=rowTr('m',rowKey(s.nazev,p0.komodita),s.nazev,p,p._zmeneno);});
     var rmap=(DATA.rucni&&DATA.rucni[sl])?DATA.rucni[sl]:{};
     Object.keys(rmap).forEach(function(id){var p=rmap[id]||{};if(mk[(p.komodita||'').toLowerCase()])return;if(passFilter(s.nazev,p,cislo))rows+=rowTr('r',sl+'|'+id,s.nazev,p,p._zmeneno);});
+    if(searching && !rows)return;
     var c=cisloOf(sl);
     html+='<div class="stavba"><div class="title"><div><div class="nazev">'+esc(s.nazev)+'</div>'+(s.info?'<div class="info">'+esc(s.info)+'</div>':'')+'</div><div class="spc"></div>'
       +'<div class="cislo">č. stavby: <b>'+(c?esc(c):'—')+'</b> <button class="rowbtn" data-cislo="'+esc(sl)+'" title="upravit číslo">✏️</button></div>'
@@ -200,7 +210,7 @@ function render(){
       +'<tr><th>1. kolo</th><th>2. kolo</th><th>3. kolo</th></tr>'
       +'</thead><tbody>'+(rows||'<tr><td colspan="9" class="empty">Žádné položky (filtr nebo zatím prázdné).</td></tr>')+'</tbody></table></div></div>';
   });
-  $('list').innerHTML=html||'<div class="empty">Nic neodpovídá filtru.</div>';
+  $('list').innerHTML=html||'<div class="empty">'+(searching?'Nic neodpovídá hledání.':'Žádná stavba.')+'</div>';
   $('updated').textContent='M - SILNICE a.s. · OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
 }
 
@@ -252,7 +262,7 @@ function normalize(raw){var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(ra
   out.stavby.forEach(function(s){var pl=s.polozky||[];if(!Array.isArray(pl)){var arr=[];Object.keys(pl).forEach(function(k){arr.push(pl[k]);});s.polozky=arr;}});return out;}
 
 $('search').addEventListener('input',function(){FILTER.q=this.value;render();});
-$('f-stavba').addEventListener('change',function(){FILTER.stavba=this.value;render();});
+$('tabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab]');if(b){FILTER.stavba=b.getAttribute('data-tab');render();}});
 $('f-sort').addEventListener('change',function(){FILTER.sort=this.value;render();});
 function segHandler(id,prop){$(id).addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;FILTER[prop]=b.getAttribute('data-v');[].forEach.call(this.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);});render();});}
 segHandler('f-typ','typ'); segHandler('f-stav','stav');
