@@ -67,9 +67,9 @@
   .zm{font-size:10px;color:var(--muted);font-weight:400;margin-top:2px}
   .rowbtn{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--txt);cursor:pointer;font-size:12px;padding:2px 6px;margin-right:4px}
   .rowbtn.del{color:var(--neg);border-color:transparent}
-  .rowbtn.star{border-color:transparent;color:var(--muted)} .rowbtn.star.on{color:#f5c518}
-  tr.dulezite td{box-shadow:inset 3px 0 0 #f5c518}
-  #f-dul.on{background:#f5c518;border-color:#f5c518;color:#1a1a1a;font-weight:700}
+  .rowbtn.star{border-color:transparent;color:#c2cbd6;font-size:15px} .rowbtn.star:hover{color:#e0a52e} .rowbtn.star.on{color:#e0a52e}
+  tr.dulezite td{background:#fff8e8} tr.dulezite td:first-child{box-shadow:inset 3px 0 0 #e0a52e}
+  #f-dul.on{background:#e0a52e;border-color:#e0a52e;color:#241a05;font-weight:700}
   .empty{color:var(--muted);font-size:13px;padding:14px}
   /* modal */
   #modal,#smodal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
@@ -117,7 +117,7 @@
     <div class="seg multi" id="f-typ"><button data-v="pop" class="on">Poptávky</button><button data-v="obj" class="on">Objednávky</button><button data-v="sml" class="on">Smlouvy</button></div>
     <div class="seg" id="f-stav"><button data-v="all" class="on">Vše</button><button data-v="obj">Objednáno</button><button data-v="ceka">Čeká</button></div>
     <select id="f-sort" class="ctrl"><option value="">Řazení: výchozí</option><option value="cislo-asc">Číslo stavby ↑</option><option value="cislo-desc">Číslo stavby ↓</option><option value="abc-asc">Abecedně A→Z</option><option value="abc-desc">Abecedně Z→A</option></select>
-    <button id="f-dul" class="btn">★ Jen důležité</button>
+    <button id="f-dul" class="btn">⚑ Jen důležité</button>
   </div>
   <div class="split" id="split">
     <div id="sidebar" class="sidebar"></div>
@@ -212,7 +212,7 @@ function rowTr(mode,idkey,nazev,p,zm){
   var dul=!!(DATA.dulezite&&DATA.dulezite[key]);
   if(FILTER.dulezite&&!dul)return '';
   var note=(DATA.poznamky&&DATA.poznamky[key])?DATA.poznamky[key]:'';
-  var star='<button class="rowbtn star'+(dul?' on':'')+'" data-star="'+esc(key)+'" title="důležité">'+(dul?'★':'☆')+'</button>';
+  var star='<button class="rowbtn star'+(dul?' on':'')+'" data-star="'+esc(key)+'" title="'+(dul?'důležité – klikni pro zrušení':'označit jako důležité')+'">'+(dul?'⚑':'⚐')+'</button>';
   var btns=star+'<button class="rowbtn" data-ed="'+mode+'|'+esc(idkey)+'" title="upravit">✏️</button>'+(mode==='r'?'<button class="rowbtn del" data-del="'+esc(idkey)+'" title="smazat">✕</button>':'');
   var zmh=zm?'<div class="zm">změněno '+esc(zm)+'</div>':'';
   return '<tr class="'+(mode==='r'?'mrow ':'')+(dul?'dulezite':'')+'"><td class="komodita">'+btns+' '+badgeHtml(p)+' '+esc(p.komodita)+zmh+'</td>'
