@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Poptávky a objednávky — M - SILNICE a.s.</title>
 <style>
-  :root{--bg:#0f1720;--card:#16212e;--line:#26384a;--txt:#e7eef6;--muted:#9fb2c6;
-    --poptavka:#2563eb;--objednavka:#16a34a;--smlouva:#b45309;--accent:#3b82f6;--head:#111c28;--title:#142433;
-    --pos:#16a34a;--neg:#ef4444;--edit:#0c131b;--rucni:#1a2740;}
+  :root{--bg:#f4f6f9;--card:#ffffff;--line:#e4e8ef;--txt:#1b2430;--muted:#667488;
+    --poptavka:#2563eb;--objednavka:#16a34a;--smlouva:#d97706;--accent:#2563eb;--head:#f2f5fa;--title:#f8fafc;
+    --pos:#16a34a;--neg:#dc2626;--edit:#ffffff;--rucni:#f0f6ff;}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);-webkit-text-size-adjust:100%}
-  header{position:sticky;top:0;z-index:5;background:#0c131b;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  header{position:sticky;top:0;z-index:5;background:#ffffff;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(15,23,42,.05)}
   header h1{font-size:16px;margin:0;font-weight:700;line-height:1.2}
   header .sub{font-size:11px;color:var(--muted)} header .spacer{flex:1}
-  .btn{background:#1f2d3d;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+  .btn{background:#ffffff;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
   .btn:active{transform:translateY(1px)}
   .btn-add{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
   .ctrl{background:var(--edit);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 12px;font-size:14px}
@@ -23,7 +24,7 @@
   .split{display:flex;gap:14px;align-items:flex-start}
   .sidebar{width:300px;flex:0 0 300px;display:flex;flex-direction:column;gap:6px;position:sticky;top:62px;max-height:calc(100vh - 90px);overflow-y:auto}
   .detail{flex:1;min-width:0}
-  .sitem{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--txt);width:100%}
+  .sitem{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--txt);width:100%;box-shadow:0 1px 2px rgba(15,23,42,.04)}
   .sitem:hover{border-color:var(--accent)}
   .sitem.on{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent);background:var(--title)}
   .sitem .snm{font-size:13px;font-weight:700;line-height:1.25}
@@ -42,9 +43,9 @@
   .badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700;color:#fff}
   .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)} .b-sml{background:var(--smlouva)}
   .schip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
-  .st-green{background:#16a34a;color:#fff} .st-amber{background:#b45309;color:#fff} .st-blue{background:#2563eb;color:#fff} .st-gray{background:#374b60;color:#cdd9e6}
+  .st-green{background:#16a34a;color:#fff} .st-amber{background:#d97706;color:#fff} .st-blue{background:#2563eb;color:#fff} .st-gray{background:#e6eaf0;color:#566273}
   .seg.multi button.on{background:var(--accent);color:#fff;font-weight:700}
-  .stavba{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+  .stavba{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)}
   .stavba .title{padding:12px 14px;border-bottom:1px solid var(--line);background:var(--title);display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
   .stavba .title .nazev{font-size:18px;font-weight:800;letter-spacing:.4px}
   .stavba .title .info{font-size:12px;color:var(--muted);margin-top:3px}
@@ -71,7 +72,10 @@
   #f-dul.on{background:#f5c518;border-color:#f5c518;color:#1a1a1a;font-weight:700}
   .empty{color:var(--muted);font-size:13px;padding:14px}
   /* modal */
-  #modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
+  #modal,#smodal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
+  .smeta2{font-size:12px;color:var(--muted);margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
+  .smeta2 b{color:var(--txt)}
+  .term-late{color:var(--neg);font-weight:700} .term-soon{color:var(--smlouva);font-weight:700}
   .mbox{background:var(--card);border:1px solid var(--line);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:18px}
   .mbox h3{margin:0 0 12px;font-size:17px}
   .mbox label{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px}
@@ -84,7 +88,7 @@
   #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
   #gate .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:340px}
   #gate h2{margin:0 0 4px;font-size:18px} #gate p{margin:0 0 16px;color:var(--muted);font-size:13px}
-  #gate input{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:9px;border:1px solid var(--line);background:#0c131b;color:var(--txt);font-size:15px}
+  #gate input{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--txt);font-size:15px}
   #gate .btn{width:100%;background:var(--accent);border-color:var(--accent);font-weight:700;padding:11px}
   #gate .err{color:#f87171;font-size:12px;min-height:16px;margin-top:6px;word-break:break-word}
   .hidden{display:none!important}
@@ -135,6 +139,15 @@
   <div class="mbtns"><button class="btn" id="m-cancel">Zrušit</button><button class="btn save" id="m-save">Uložit</button></div>
 </div></div>
 
+<div id="smodal" class="hidden"><div class="mbox">
+  <h3>Stavba / zakázka</h3>
+  <label>Název stavby</label><input id="s-nazev">
+  <label>Investor</label><input id="s-investor">
+  <label>Číslo stavby (zakázky)</label><input id="s-cislo">
+  <div class="mgrid"><div><label>Předání staveniště</label><input id="s-predani" type="date"></div><div><label>Dokončení stavby</label><input id="s-dokonceni" type="date"></div><div><label>Předčasné užívání</label><input id="s-uzivani" type="date"></div></div>
+  <div class="mbtns"><button class="btn" id="s-cancel">Zrušit</button><button class="btn save" id="s-save">Uložit</button></div>
+</div></div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -169,7 +182,13 @@ function typKind(p){var t=(p.typ||'').toUpperCase(),z=(p.zasmluvneni||'').toLowe
 function badgeHtml(p){var k=typKind(p),m={pop:['b-pop','POP'],obj:['b-obj','OBJ'],sml:['b-sml','SML']}[k];return '<span class="badge '+m[0]+'">'+m[1]+'</span>';}
 function stavDefault(p){if(p.stav&&String(p.stav).trim())return String(p.stav).trim();if((p.objednano||'').toUpperCase().indexOf('ANO')===0)return 'Objednáno';var z=(p.zasmluvneni||'').toLowerCase();if(z.indexOf('smlouv')!==-1)return 'Zasmluvněno';if(z.indexOf('akcept')!==-1)return 'Akceptováno';if(p.vitez&&String(p.vitez).trim())return 'Vybráno';return 'Poptáno';}
 function stavClass(s){var t=(s||'').toLowerCase();if(/hotov|dokon|zasmluvn|objedn|podeps|akcept|uzav/.test(t))return 'st-green';if(/p[řr]ipom[ií]n|[čc]ek|podpis|jedn[áa]|[řr]e[šs][ií]|rozjedn/.test(t))return 'st-amber';if(/popt|v[ýy]b[ěe]r|cn|nab[ií]dk/.test(t))return 'st-blue';return 'st-gray';}
-function koloText(p){var ks=[p.kolo1,p.kolo2,p.kolo3],last=-1;for(var i=0;i<3;i++){if(ks[i]!=null&&String(ks[i]).trim()!=='')last=i;}if(last<0)return '';return (last+1)+'. kolo';}
+function koloText(p){var ks=[p.kolo1,p.kolo2,p.kolo3],out=[];for(var i=0;i<3;i++){var v=ks[i];if(v!=null&&String(v).trim()!=='')out.push((i+1)+'. <b>'+esc(String(v).trim())+'</b>');}return out.join('<br>');}
+function exOf(sl){return (DATA.stavby_extra&&DATA.stavby_extra[sl])||{};}
+function origNazev(sl){var o='';(DATA.stavby||[]).forEach(function(s){if(slug(s.nazev)===sl)o=s.nazev;});return o;}
+function displayName(s){var ex=exOf(slug(s.nazev));return (ex.nazev&&String(ex.nazev).trim())?String(ex.nazev).trim():(s.nazev||'').replace(/[„“”]/g,'').trim();}
+function fmtDate(iso){if(!iso)return '';var p=String(iso).split('-');return p.length===3?(p[2]+'.'+p[1]+'.'+p[0]):String(iso);}
+function daysTo(iso){if(!iso)return null;var d=new Date(String(iso)+'T00:00:00');if(isNaN(d.getTime()))return null;var n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000);}
+function dleft(iso){var n=daysTo(iso);if(n==null)return '';if(n<0)return ' (po termínu '+(-n)+' dní)';if(n===0)return ' (dnes)';return ' (za '+n+' dní)';}
 function eff(nazev,p0){var k=rowKey(nazev,p0.komodita),ov=(DATA.upravy&&DATA.upravy[k])?DATA.upravy[k]:{},o={_zmeneno:ov._zmeneno||'',_kdo:ov._kdo||''};
   FIELDS.forEach(function(f){o[f]=(f in ov)?ov[f]:(p0[f]!=null?p0[f]:'');});return o;}
 function nowStr(){var d=new Date();function p(n){return (n<10?'0':'')+n;}return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());}
@@ -197,9 +216,8 @@ function rowTr(mode,idkey,nazev,p,zm){
   var btns=star+'<button class="rowbtn" data-ed="'+mode+'|'+esc(idkey)+'" title="upravit">✏️</button>'+(mode==='r'?'<button class="rowbtn del" data-del="'+esc(idkey)+'" title="smazat">✕</button>':'');
   var zmh=zm?'<div class="zm">změněno '+esc(zm)+'</div>':'';
   return '<tr class="'+(mode==='r'?'mrow ':'')+(dul?'dulezite':'')+'"><td class="komodita">'+btns+' '+badgeHtml(p)+' '+esc(p.komodita)+zmh+'</td>'
-    +'<td class="c">'+esc(koloText(p))+'</td>'
+    +'<td class="c">'+koloText(p)+'</td>'
     +'<td class="c">'+esc(p.vitez)+'</td><td class="c">'+esc(p.zasmluvneni)+'</td>'
-    +'<td class="c">'+esc(p.kolo1)+'</td>'
     +'<td class="cena">'+fmtNum(p.cenaVysoutezena)+'</td>'
     +'<td class="c"><span class="schip '+stavClass(stavDefault(p))+'">'+esc(stavDefault(p))+'</span></td>'
     +'<td class="pozn">'+esc(p.poznamka)+(note?'<div class="zm">📝 '+esc(note)+'</div>':'')+'</td></tr>';
@@ -224,7 +242,7 @@ function render(){
   // seznam staveb vlevo
   var side='';
   vis.forEach(function(v){
-    var nm=(v.s.nazev||'').replace(/[„“”]/g,'').trim(), on=(v.sl===FILTER.stavba);
+    var nm=displayName(v.s), on=(v.sl===FILTER.stavba);
     var pop=0,obj=0,sml=0;v.items.forEach(function(it){var k=typKind(it.p);if(k==='obj')obj++;else if(k==='sml')sml++;else pop++;});
     var meta='';
     if(v.cislo)meta+='<span>č.'+esc(v.cislo)+'</span>';
@@ -240,13 +258,19 @@ function render(){
   var detail='';
   if(sel){
     var rows='';sel.matched.forEach(function(it){rows+=rowTr(it.mode,it.idkey,sel.s.nazev,it.p,it.p._zmeneno);});
+    var ex=exOf(sel.sl),m2='';
+    if(sel.cislo)m2+='<span>č. <b>'+esc(sel.cislo)+'</b></span>';
+    if(ex.investor)m2+='<span>Investor: <b>'+esc(ex.investor)+'</b></span>';
+    if(ex.predani)m2+='<span>Předání: <b>'+esc(fmtDate(ex.predani))+'</b></span>';
+    if(ex.dokonceni){var dd=daysTo(ex.dokonceni);m2+='<span class="'+(dd!=null&&dd<0?'term-late':(dd!=null&&dd<=14?'term-soon':''))+'">Dokončení: <b>'+esc(fmtDate(ex.dokonceni))+'</b>'+esc(dleft(ex.dokonceni))+'</span>';}
+    if(ex.uzivani){var du=daysTo(ex.uzivani);m2+='<span class="'+(du!=null&&du<0?'term-late':(du!=null&&du<=14?'term-soon':''))+'">Předč. užívání: <b>'+esc(fmtDate(ex.uzivani))+'</b>'+esc(dleft(ex.uzivani))+'</span>';}
     detail='<button class="btn backbtn" id="backbtn">← Stavby</button>'
-      +'<div class="stavba"><div class="title"><div><div class="nazev">'+esc(sel.s.nazev)+'</div>'+(sel.s.info?'<div class="info">'+esc(sel.s.info)+'</div>':'')+'</div><div class="spc"></div>'
-      +'<div class="cislo">č. stavby: <b>'+(sel.cislo?esc(sel.cislo):'—')+'</b> <button class="rowbtn" data-cislo="'+esc(sel.sl)+'" title="upravit číslo">✏️</button></div>'
+      +'<div class="stavba"><div class="title"><div style="flex:1;min-width:0"><div class="nazev">'+esc(displayName(sel.s))+'</div>'+(sel.s.info?'<div class="info">'+esc(sel.s.info)+'</div>':'')+(m2?'<div class="smeta2">'+m2+'</div>':'')+'</div>'
+      +'<button class="btn" data-stedit="'+esc(sel.sl)+'">✏️ Stavba</button>'
       +'<button class="btn btn-add" data-add="'+esc(sel.sl)+'">+ řádek</button></div>'
       +'<div class="tbl-scroll"><table><thead>'
-      +'<tr><th>Komodita</th><th>Kolo VŘ</th><th>Vítěz</th><th>Zasmluvnění</th><th>Datum</th><th>Cena</th><th>Stav</th><th>Poznámka</th></tr>'
-      +'</thead><tbody>'+(rows||'<tr><td colspan="8" class="empty">Žádné položky.</td></tr>')+'</tbody></table></div></div>';
+      +'<tr><th>Komodita</th><th>Kola VŘ</th><th>Vítěz</th><th>Zasmluvnění</th><th>Cena</th><th>Stav</th><th>Poznámka</th></tr>'
+      +'</thead><tbody>'+(rows||'<tr><td colspan="7" class="empty">Žádné položky.</td></tr>')+'</tbody></table></div></div>';
   } else { detail='<div class="empty">'+(searching?'Nic neodpovídá hledání.':'Žádná stavba.')+'</div>'; }
   $('detail').innerHTML=detail;
   $('updated').textContent='M - SILNICE a.s. · OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
@@ -307,6 +331,7 @@ segHandler('f-stav','stav');
 $('f-typ').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var v=b.getAttribute('data-v');FILTER.typ[v]=!FILTER.typ[v];b.classList.toggle('on',FILTER.typ[v]);render();});
 $('detail').addEventListener('click',function(e){
   if(e.target.closest('#backbtn')){$('split').classList.remove('show-detail');return;}
+  var se=e.target.closest('[data-stedit]'); if(se){openStavbaEdit(se.getAttribute('data-stedit'));return;}
   var ed=e.target.closest('[data-ed]'); if(ed){var pr=ed.getAttribute('data-ed').split('|');openEdit(pr[0],pr.slice(1).join('|'));return;}
   var ad=e.target.closest('[data-add]'); if(ad){openNew(ad.getAttribute('data-add'));return;}
   var dl=e.target.closest('[data-del]'); if(dl){if(confirm('Smazat tento řádek?'))delRow(dl.getAttribute('data-del'));return;}
@@ -318,6 +343,12 @@ $('f-dul').addEventListener('click',function(){FILTER.dulezite=!FILTER.dulezite;
 $('m-cancel').addEventListener('click',closeModal);
 $('m-save').addEventListener('click',saveModal);
 $('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+var SCTX=null;
+function openStavbaEdit(sl){SCTX={sl:sl};var ex=exOf(sl);$('s-nazev').value=(ex.nazev&&String(ex.nazev).trim())?ex.nazev:(origNazev(sl)||'').replace(/[„“”]/g,'').trim();$('s-investor').value=ex.investor||'';$('s-cislo').value=ex.cislo||'';$('s-predani').value=ex.predani||'';$('s-dokonceni').value=ex.dokonceni||'';$('s-uzivani').value=ex.uzivani||'';$('smodal').classList.remove('hidden');}
+function saveStavbaEdit(){if(!SCTX)return;var sl=SCTX.sl;var o={nazev:$('s-nazev').value.trim(),investor:$('s-investor').value.trim(),cislo:$('s-cislo').value.trim(),predani:$('s-predani').value,dokonceni:$('s-dokonceni').value,uzivani:$('s-uzivani').value};DATA.stavby_extra=DATA.stavby_extra||{};DATA.stavby_extra[sl]=Object.assign(DATA.stavby_extra[sl]||{},o);if(db)db.ref('/stavby_extra/'+sl).update(o);$('smodal').classList.add('hidden');SCTX=null;if(!db)render();}
+$('s-cancel').addEventListener('click',function(){$('smodal').classList.add('hidden');SCTX=null;});
+$('s-save').addEventListener('click',saveStavbaEdit);
+$('smodal').addEventListener('click',function(e){if(e.target===this){this.classList.add('hidden');SCTX=null;}});
 
 function startApp(){if(started)return;started=true;showApp();try{db.ref('/').on('value',function(snap){DATA=normalize(snap.val()||{});render();},function(){});}catch(e){}}
 if(DEMO_MODE){$('demo').classList.remove('hidden');DATA=DEMO;DATA.poznamky={};DATA.upravy={};DATA.rucni={};DATA.stavby_extra={};showApp();$('logout').classList.add('hidden');}
