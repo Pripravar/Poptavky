@@ -70,6 +70,8 @@
   .rowbtn.star{border-color:transparent;color:#c2cbd6;font-size:15px} .rowbtn.star:hover{color:#e0a52e} .rowbtn.star.on{color:#e0a52e}
   tr.dulezite td{background:#fff8e8} tr.dulezite td:first-child{box-shadow:inset 3px 0 0 #e0a52e}
   #f-dul.on{background:#e0a52e;border-color:#e0a52e;color:#241a05;font-weight:700}
+  #f-arch.on{background:#475569;border-color:#475569;color:#fff;font-weight:700}
+  .archtag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e6eaf0;color:#566273;vertical-align:middle;letter-spacing:0}
   .empty{color:var(--muted);font-size:13px;padding:14px}
   /* modal */
   #modal,#smodal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
@@ -118,6 +120,7 @@
     <div class="seg" id="f-stav"><button data-v="all" class="on">Vše</button><button data-v="obj">Objednáno</button><button data-v="ceka">Čeká</button></div>
     <select id="f-sort" class="ctrl"><option value="">Řazení: výchozí</option><option value="cislo-asc">Číslo stavby ↑</option><option value="cislo-desc">Číslo stavby ↓</option><option value="abc-asc">Abecedně A→Z</option><option value="abc-desc">Abecedně Z→A</option></select>
     <button id="f-dul" class="btn">⚑ Jen důležité</button>
+    <button id="f-arch" class="btn">📦 Archiv</button>
   </div>
   <div class="split" id="split">
     <div id="sidebar" class="sidebar"></div>
@@ -167,7 +170,7 @@ function isPlaceholder(){return !FIREBASE_CONFIG.apiKey||FIREBASE_CONFIG.apiKey.
 var DEMO_MODE=isPlaceholder()||/[?&]demo/.test(location.search)||location.hostname==='localhost'||location.hostname==='127.0.0.1';
 
 var DATA={meta:{},stavby:[],poznamky:{},upravy:{},rucni:{},stavby_extra:{},dulezite:{}};
-var FILTER={q:'',stavba:'',typ:{pop:1,obj:1,sml:1},stav:'all',sort:'',dulezite:false};
+var FILTER={q:'',stavba:'',typ:{pop:1,obj:1,sml:1},stav:'all',sort:'',dulezite:false,archiv:false};
 var db=null,auth=null,started=false,CTX=null;
 var FIELDS=['komodita','typ','kolo1','kolo2','kolo3','vitez','zasmluvneni','objednano','cenaNakladova','cenaVysoutezena','poznamka','stav'];
 
@@ -198,6 +201,8 @@ function buildStavbaFilter(){var sel=$('f-stavba'),cur=sel.value,opts='<option v
   (DATA.stavby||[]).forEach(function(s){var nm=(s.nazev||'').replace(/[„“”]/g,'').trim();var c=cisloOf(slug(s.nazev));opts+='<option value="'+esc(slug(s.nazev))+'">'+esc(nm)+(c?' ('+esc(c)+')':'')+'</option>';});
   sel.innerHTML=opts; sel.value=cur;}
 function cisloOf(sl){return (DATA.stavby_extra&&DATA.stavby_extra[sl]&&DATA.stavby_extra[sl].cislo)?DATA.stavby_extra[sl].cislo:'';}
+function isArchived(sl){return !!(exOf(sl).archiv);}
+function setArchived(sl,val){DATA.stavby_extra=DATA.stavby_extra||{};DATA.stavby_extra[sl]=DATA.stavby_extra[sl]||{};if(val){DATA.stavby_extra[sl].archiv=true;if(db)db.ref('/stavby_extra/'+sl+'/archiv').set(true);}else{delete DATA.stavby_extra[sl].archiv;if(db)db.ref('/stavby_extra/'+sl+'/archiv').remove();}if(!db)render();}
 function passFilter(nazev,p,cislo){var kind=typKind(p);
   if(!FILTER.typ[kind])return false;
   var jeObj=(String(p.objednano||'').toUpperCase().indexOf('ANO')===0);
@@ -230,7 +235,7 @@ function render(){
   var searching=FILTER.q.trim()!=='';
   var vis=[];
   stavbyList.forEach(function(s){
-    var sl=slug(s.nazev),cislo=cisloOf(sl),items=[],mk={};
+    var sl=slug(s.nazev);if(isArchived(sl)!==FILTER.archiv)return;var cislo=cisloOf(sl),items=[],mk={};
     (s.polozky||[]).forEach(function(p0){var p=eff(s.nazev,p0);mk[(p.komodita||'').toLowerCase()]=1;items.push({p:p,mode:'m',idkey:rowKey(s.nazev,p0.komodita)});});
     var rmap=(DATA.rucni&&DATA.rucni[sl])?DATA.rucni[sl]:{};
     Object.keys(rmap).forEach(function(id){var p=rmap[id]||{};if(mk[(p.komodita||'').toLowerCase()])return;items.push({p:p,mode:'r',idkey:sl+'|'+id});});
@@ -252,7 +257,7 @@ function render(){
     if(sml)meta+='<span class="pill b-sml" title="smlouvy">'+sml+'</span>';
     side+='<button class="sitem'+(on?' on':'')+'" data-sid="'+esc(v.sl)+'"><div class="snm">'+esc(nm)+'</div><div class="smeta">'+meta+'</div></button>';
   });
-  $('sidebar').innerHTML=side||'<div class="empty">Žádná stavba.</div>';
+  $('sidebar').innerHTML=side||'<div class="empty">'+(FILTER.archiv?'Archiv je prázdný.':'Žádná stavba.')+'</div>';
   // detail vybrané stavby vpravo
   var sel=null;vis.forEach(function(v){if(v.sl===FILTER.stavba)sel=v;});
   var detail='';
@@ -265,14 +270,18 @@ function render(){
     if(ex.dokonceni){var dd=daysTo(ex.dokonceni);m2+='<span class="'+(dd!=null&&dd<0?'term-late':(dd!=null&&dd<=14?'term-soon':''))+'">Dokončení: <b>'+esc(fmtDate(ex.dokonceni))+'</b>'+esc(dleft(ex.dokonceni))+'</span>';}
     if(ex.uzivani){var du=daysTo(ex.uzivani);m2+='<span class="'+(du!=null&&du<0?'term-late':(du!=null&&du<=14?'term-soon':''))+'">Předč. užívání: <b>'+esc(fmtDate(ex.uzivani))+'</b>'+esc(dleft(ex.uzivani))+'</span>';}
     detail='<button class="btn backbtn" id="backbtn">← Stavby</button>'
-      +'<div class="stavba"><div class="title"><div style="flex:1;min-width:0"><div class="nazev">'+esc(displayName(sel.s))+'</div>'+(sel.s.info?'<div class="info">'+esc(sel.s.info)+'</div>':'')+(m2?'<div class="smeta2">'+m2+'</div>':'')+'</div>'
+      +'<div class="stavba"><div class="title"><div style="flex:1;min-width:0"><div class="nazev">'+esc(displayName(sel.s))+(isArchived(sel.sl)?' <span class="archtag">📦 archiv</span>':'')+'</div>'+(sel.s.info?'<div class="info">'+esc(sel.s.info)+'</div>':'')+(m2?'<div class="smeta2">'+m2+'</div>':'')+'</div>'
       +'<button class="btn" data-stedit="'+esc(sel.sl)+'">✏️ Stavba</button>'
+      +'<button class="btn" data-arch="'+esc(sel.sl)+'">'+(isArchived(sel.sl)?'↩︎ Vrátit z archivu':'📦 Do archivu')+'</button>'
       +'<button class="btn btn-add" data-add="'+esc(sel.sl)+'">+ řádek</button></div>'
       +'<div class="tbl-scroll"><table><thead>'
       +'<tr><th>Komodita</th><th>Kola VŘ</th><th>Vítěz</th><th>Zasmluvnění</th><th>Cena</th><th>Stav</th><th>Poznámka</th></tr>'
       +'</thead><tbody>'+(rows||'<tr><td colspan="7" class="empty">Žádné položky.</td></tr>')+'</tbody></table></div></div>';
-  } else { detail='<div class="empty">'+(searching?'Nic neodpovídá hledání.':'Žádná stavba.')+'</div>'; }
+  } else { detail='<div class="empty">'+(searching?'Nic neodpovídá hledání.':(FILTER.archiv?'Archiv je prázdný.':'Žádná stavba.'))+'</div>'; }
   $('detail').innerHTML=detail;
+  var archCount=(DATA.stavby||[]).filter(function(s){return isArchived(slug(s.nazev));}).length;
+  $('f-arch').textContent='📦 Archiv'+(archCount?' ('+archCount+')':'');
+  $('f-arch').classList.toggle('on',FILTER.archiv);
   $('updated').textContent='M - SILNICE a.s. · OZ Jih · aktualizováno: '+(DATA.meta&&DATA.meta.updatedAt?DATA.meta.updatedAt:'—');
 }
 
@@ -337,9 +346,12 @@ $('detail').addEventListener('click',function(e){
   var dl=e.target.closest('[data-del]'); if(dl){if(confirm('Smazat tento řádek?'))delRow(dl.getAttribute('data-del'));return;}
   var ci=e.target.closest('[data-cislo]'); if(ci){editCislo(ci.getAttribute('data-cislo'));return;}
   var st=e.target.closest('[data-star]'); if(st){toggleDul(st.getAttribute('data-star'));return;}
+  var arb=e.target.closest('[data-arch]'); if(arb){toggleArchiv(arb.getAttribute('data-arch'));return;}
 });
+function toggleArchiv(sl){setArchived(sl,!isArchived(sl));}
 function toggleDul(key){DATA.dulezite=DATA.dulezite||{};if(DATA.dulezite[key]){delete DATA.dulezite[key];if(db)db.ref('/dulezite/'+key).remove();else render();}else{DATA.dulezite[key]=true;if(db)db.ref('/dulezite/'+key).set(true);else render();}}
 $('f-dul').addEventListener('click',function(){FILTER.dulezite=!FILTER.dulezite;this.classList.toggle('on',FILTER.dulezite);render();});
+$('f-arch').addEventListener('click',function(){FILTER.archiv=!FILTER.archiv;FILTER.stavba='';render();});
 $('m-cancel').addEventListener('click',closeModal);
 $('m-save').addEventListener('click',saveModal);
 $('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
