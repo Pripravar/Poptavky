@@ -95,6 +95,15 @@
   #gate .err{color:#f87171;font-size:12px;min-height:16px;margin-top:6px;word-break:break-word}
   .hidden{display:none!important}
   .demo-bar{background:#7c3a02;color:#ffd9a8;font-size:12px;text-align:center;padding:6px}
+  .viewtabs{display:flex;gap:6px;margin:2px 0 12px;flex-wrap:wrap}
+  .vtab{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer}
+  .vtab:hover{border-color:var(--accent)}
+  .vtab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .zblok{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fbfcfe}
+  .zbts{font-size:11px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+  .zbts .zbacts{margin-left:auto;display:flex;gap:4px}
+  .zbtext{white-space:pre-wrap;font-size:13.5px;line-height:1.55;word-break:break-word}
+  .zadd-wrap{padding:14px}
 </style>
 </head>
 <body>
@@ -114,6 +123,11 @@
 </header>
 
 <div class="wrap hidden" id="app">
+  <div class="viewtabs">
+    <button class="vtab on" id="v-stavby">🏗 Stavby</button>
+    <button class="vtab" id="v-zapisy">📋 Zápisy z porad</button>
+  </div>
+  <div id="view-stavby">
   <div class="toolbar">
     <input id="search" class="ctrl" placeholder="🔎 hledat (napříč stavbami)…">
     <div class="seg multi" id="f-typ"><button data-v="pop" class="on">Poptávky</button><button data-v="obj" class="on">Objednávky</button><button data-v="sml" class="on">Smlouvy</button></div>
@@ -127,6 +141,17 @@
   <div class="split" id="split">
     <div id="sidebar" class="sidebar"></div>
     <div id="detail" class="detail"></div>
+  </div>
+  </div>
+  <div id="view-zapisy" class="hidden">
+    <div class="toolbar">
+      <button class="btn btn-add" id="z-new">+ Nový zápis</button>
+      <input id="z-search" class="ctrl" placeholder="🔎 hledat v zápisech…" style="max-width:320px">
+    </div>
+    <div class="split" id="zsplit">
+      <div id="zsidebar" class="sidebar"></div>
+      <div id="zdetail" class="detail"></div>
+    </div>
   </div>
 </div>
 
@@ -155,6 +180,13 @@
   <div class="mbtns"><button class="btn" id="s-cancel">Zrušit</button><button class="btn save" id="s-save">Uložit</button></div>
 </div></div>
 
+<div id="zmodal" class="hidden"><div class="mbox">
+  <h3 id="z-title">Nový zápis</h3>
+  <div id="z-meta-fields"><div class="mgrid2"><div><label>Datum porady</label><input id="z-datum" type="date"></div><div><label>Nadpis / téma</label><input id="z-nadpis" placeholder="např. Koordinace výroby"></div></div></div>
+  <div id="z-text-wrap"><label id="z-text-label">Text zápisu</label><textarea id="z-text" style="min-height:220px"></textarea></div>
+  <div class="mbtns"><button class="btn" id="z-cancel">Zrušit</button><button class="btn save" id="z-modal-save">Uložit</button></div>
+</div></div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -173,8 +205,9 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){retur
 function isPlaceholder(){return !FIREBASE_CONFIG.apiKey||FIREBASE_CONFIG.apiKey.indexOf('PLACEHOLDER')!==-1;}
 var DEMO_MODE=isPlaceholder()||/[?&]demo/.test(location.search)||location.hostname==='localhost'||location.hostname==='127.0.0.1';
 
-var DATA={meta:{},stavby:[],poznamky:{},upravy:{},rucni:{},stavby_extra:{},dulezite:{}};
+var DATA={meta:{},stavby:[],poznamky:{},upravy:{},rucni:{},stavby_extra:{},dulezite:{},zapisy:{}};
 var FILTER={q:'',stavba:'',typ:{pop:1,obj:1,sml:1},stav:'all',sort:'',dulezite:false,archiv:false,pripravar:'',stavbyvedouci:''};
+var VIEW='stavby',ZSEL=null,ZCTX=null,ZFILTER={q:''};
 var db=null,auth=null,started=false,CTX=null;
 var FIELDS=['komodita','typ','kolo1','kolo2','kolo3','vitez','zasmluvneni','objednano','cenaNakladova','cenaVysoutezena','poznamka','stav'];
 
@@ -342,8 +375,67 @@ function saveNoteKey(key,val){if(val){DATA.poznamky[key]=val;if(db)db.ref('/pozn
 function delRow(idkey){var pr=idkey.split('|'),sl=pr[0],id=pr[1];if(db)db.ref('/rucni/'+sl+'/'+id).remove();else{if(DATA.rucni[sl])delete DATA.rucni[sl][id];render();}}
 function editCislo(sl){var cur=cisloOf(sl);var v=prompt('Číslo stavby:',cur);if(v===null)return;v=v.trim();DATA.stavby_extra[sl]=DATA.stavby_extra[sl]||{};DATA.stavby_extra[sl].cislo=v;if(db)db.ref('/stavby_extra/'+sl+'/cislo').set(v);else render();}
 
-function showApp(){$('gate').classList.add('hidden');$('topbar').classList.remove('hidden');$('app').classList.remove('hidden');render();}
-function normalize(raw){var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(raw&&raw.poznamky)||{},upravy:(raw&&raw.upravy)||{},rucni:(raw&&raw.rucni)||{},stavby_extra:(raw&&raw.stavby_extra)||{},dulezite:(raw&&raw.dulezite)||{}};
+// ── ZÁPISY Z PORAD ──
+function todayISO(){var d=new Date();function p(n){return (n<10?'0':'')+n;}return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
+function zList(){var z=DATA.zapisy||{};return Object.keys(z).map(function(k){var o=z[k]||{};o._id=k;return o;}).sort(function(a,b){return (String(b.datum||'').localeCompare(String(a.datum||'')))||(String(b.vytvoreno||'').localeCompare(String(a.vytvoreno||'')));});}
+function blokList(zap){var b=(zap&&zap.bloky)||{};return Object.keys(b).sort().map(function(k){var o=b[k]||{};o._id=k;return o;});}
+function setView(v){VIEW=v;$('v-stavby').classList.toggle('on',v==='stavby');$('v-zapisy').classList.toggle('on',v==='zapisy');$('view-stavby').classList.toggle('hidden',v!=='stavby');$('view-zapisy').classList.toggle('hidden',v!=='zapisy');if(v==='zapisy')renderZapisy();else render();}
+function renderZapisy(){
+  if(!$('zsidebar'))return;
+  var q=(ZFILTER.q||'').trim().toLowerCase();
+  var list=zList().filter(function(z){if(!q)return true;var hay=((z.nadpis||'')+' '+(z.datum||'')+' '+blokList(z).map(function(b){return b.text||'';}).join(' ')).toLowerCase();return hay.indexOf(q)!==-1;});
+  if(list.length&&!list.some(function(z){return z._id===ZSEL;}))ZSEL=list[0]._id;
+  var side='';
+  list.forEach(function(z){var on=z._id===ZSEL,n=blokList(z).length;
+    side+='<button class="sitem'+(on?' on':'')+'" data-zid="'+esc(z._id)+'"><div class="snm">'+esc(z.nadpis||'(bez názvu)')+'</div><div class="smeta"><span>'+esc(fmtDate(z.datum))+'</span><span class="pill b-pop" title="počet zápisů/doplnění">'+n+'</span></div></button>';});
+  $('zsidebar').innerHTML=side||'<div class="empty">Zatím žádné zápisy. Klikni „+ Nový zápis".</div>';
+  var sel=null;list.forEach(function(z){if(z._id===ZSEL)sel=z;});
+  var d='';
+  if(sel){var bl=blokList(sel),body='';
+    bl.forEach(function(b){body+='<div class="zblok"><div class="zbts">📌 '+esc(b.ts||'')+(b.kdo?' · '+esc(b.kdo):'')+(b.upraveno?' · upraveno '+esc(b.upraveno):'')+'<span class="zbacts"><button class="rowbtn" data-zbed="'+esc(sel._id)+'|'+esc(b._id)+'" title="upravit">✏️</button><button class="rowbtn del" data-zbdel="'+esc(sel._id)+'|'+esc(b._id)+'" title="smazat">✕</button></span></div><div class="zbtext">'+esc(b.text||'')+'</div></div>';});
+    d='<button class="btn backbtn" id="zbackbtn">← Zápisy</button>'
+      +'<div class="stavba"><div class="title"><div style="flex:1;min-width:0"><div class="nazev">'+esc(sel.nadpis||'(bez názvu)')+'</div><div class="info">Porada '+esc(fmtDate(sel.datum))+(sel.vytvoreno?' · vytvořeno '+esc(sel.vytvoreno):'')+'</div></div>'
+      +'<button class="btn" data-zmeta="'+esc(sel._id)+'">✏️ Upravit</button>'
+      +'<button class="btn" data-zdel="'+esc(sel._id)+'">🗑 Smazat</button></div>'
+      +'<div class="zadd-wrap">'+(body||'<div class="empty">Zatím nic.</div>')+'<button class="btn btn-add" data-zadd="'+esc(sel._id)+'" style="margin-top:6px">+ Doplnit zápis</button></div></div>';
+  } else { d='<div class="empty">'+(q?'Nic neodpovídá hledání.':'Vyber zápis vlevo, nebo přidej nový („+ Nový zápis").')+'</div>'; }
+  $('zdetail').innerHTML=d;
+}
+function showZFields(meta,text){$('z-meta-fields').classList.toggle('hidden',!meta);$('z-text-wrap').classList.toggle('hidden',!text);}
+function openZNew(){ZCTX={mode:'new'};$('z-title').textContent='Nový zápis';showZFields(true,true);$('z-datum').value=todayISO();$('z-nadpis').value='';$('z-text').value='';$('z-text-label').textContent='Text zápisu';$('zmodal').classList.remove('hidden');setTimeout(function(){$('z-nadpis').focus();},30);}
+function openZMeta(id){var z=(DATA.zapisy||{})[id]||{};ZCTX={mode:'meta',id:id};$('z-title').textContent='Upravit zápis';showZFields(true,false);$('z-datum').value=z.datum||todayISO();$('z-nadpis').value=z.nadpis||'';$('zmodal').classList.remove('hidden');}
+function openZAdd(id){ZCTX={mode:'blok-new',id:id};$('z-title').textContent='Doplnit zápis';showZFields(false,true);$('z-text-label').textContent='Doplnění (uloží se s dnešním datem a časem)';$('z-text').value='';$('zmodal').classList.remove('hidden');setTimeout(function(){$('z-text').focus();},30);}
+function openZBEdit(id,bid){var b=(((DATA.zapisy||{})[id]||{}).bloky||{})[bid]||{};ZCTX={mode:'blok-edit',id:id,bid:bid};$('z-title').textContent='Upravit doplnění';showZFields(false,true);$('z-text-label').textContent='Text';$('z-text').value=b.text||'';$('zmodal').classList.remove('hidden');}
+function closeZModal(){$('zmodal').classList.add('hidden');ZCTX=null;}
+function saveZModal(){if(!ZCTX)return;var now=nowStr(),kdo=whoNow();
+  if(ZCTX.mode==='new'){var o={datum:$('z-datum').value||todayISO(),nadpis:$('z-nadpis').value.trim()||'(bez názvu)',vytvoreno:now,kdo:kdo,bloky:{}};var txt=$('z-text').value.trim();
+    if(db){var ref=db.ref('/zapisy').push(o);if(txt)ref.child('bloky/b'+Date.now()).set({ts:now,text:txt,kdo:kdo});ZSEL=ref.key;}
+    else{var id='z'+Date.now();if(txt)o.bloky['b'+Date.now()]={ts:now,text:txt,kdo:kdo};DATA.zapisy=DATA.zapisy||{};DATA.zapisy[id]=o;ZSEL=id;}
+  } else if(ZCTX.mode==='meta'){var u={datum:$('z-datum').value,nadpis:$('z-nadpis').value.trim()||'(bez názvu)'};DATA.zapisy[ZCTX.id]=Object.assign(DATA.zapisy[ZCTX.id]||{},u);if(db)db.ref('/zapisy/'+ZCTX.id).update(u);
+  } else if(ZCTX.mode==='blok-new'){var t2=$('z-text').value.trim();if(t2){var blk={ts:now,text:t2,kdo:kdo};if(db)db.ref('/zapisy/'+ZCTX.id+'/bloky/b'+Date.now()).set(blk);else{DATA.zapisy[ZCTX.id].bloky=DATA.zapisy[ZCTX.id].bloky||{};DATA.zapisy[ZCTX.id].bloky['b'+Date.now()]=blk;}}
+  } else if(ZCTX.mode==='blok-edit'){var t3=$('z-text').value.trim(),p='/zapisy/'+ZCTX.id+'/bloky/'+ZCTX.bid;if(db){db.ref(p+'/text').set(t3);db.ref(p+'/upraveno').set(now);}else{var bb=DATA.zapisy[ZCTX.id].bloky[ZCTX.bid];bb.text=t3;bb.upraveno=now;}}
+  closeZModal();if(!db)renderZapisy();}
+function delZapis(id){if(!confirm('Smazat celý zápis i s doplněními?'))return;if(ZSEL===id)ZSEL=null;if(db)db.ref('/zapisy/'+id).remove();else{delete DATA.zapisy[id];renderZapisy();}}
+function delBlok(id,bid){if(!confirm('Smazat toto doplnění?'))return;if(db)db.ref('/zapisy/'+id+'/bloky/'+bid).remove();else{delete DATA.zapisy[id].bloky[bid];renderZapisy();}}
+$('v-stavby').addEventListener('click',function(){setView('stavby');});
+$('v-zapisy').addEventListener('click',function(){setView('zapisy');});
+$('z-new').addEventListener('click',openZNew);
+$('z-search').addEventListener('input',function(){ZFILTER.q=this.value;renderZapisy();});
+$('zsidebar').addEventListener('click',function(e){var b=e.target.closest('[data-zid]');if(b){ZSEL=b.getAttribute('data-zid');$('zsplit').classList.add('show-detail');renderZapisy();}});
+$('zdetail').addEventListener('click',function(e){
+  if(e.target.closest('#zbackbtn')){$('zsplit').classList.remove('show-detail');return;}
+  var m=e.target.closest('[data-zmeta]');if(m){openZMeta(m.getAttribute('data-zmeta'));return;}
+  var dz=e.target.closest('[data-zdel]');if(dz){delZapis(dz.getAttribute('data-zdel'));return;}
+  var ad=e.target.closest('[data-zadd]');if(ad){openZAdd(ad.getAttribute('data-zadd'));return;}
+  var be=e.target.closest('[data-zbed]');if(be){var pr=be.getAttribute('data-zbed').split('|');openZBEdit(pr[0],pr.slice(1).join('|'));return;}
+  var bd=e.target.closest('[data-zbdel]');if(bd){var pr2=bd.getAttribute('data-zbdel').split('|');delBlok(pr2[0],pr2.slice(1).join('|'));return;}
+});
+$('z-cancel').addEventListener('click',closeZModal);
+$('z-modal-save').addEventListener('click',saveZModal);
+$('zmodal').addEventListener('click',function(e){if(e.target===this)closeZModal();});
+
+function showApp(){$('gate').classList.add('hidden');$('topbar').classList.remove('hidden');$('app').classList.remove('hidden');render();renderZapisy();}
+function normalize(raw){var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(raw&&raw.poznamky)||{},upravy:(raw&&raw.upravy)||{},rucni:(raw&&raw.rucni)||{},stavby_extra:(raw&&raw.stavby_extra)||{},dulezite:(raw&&raw.dulezite)||{},zapisy:(raw&&raw.zapisy)||{}};
   var sv=(raw&&raw.stavby)||{};Object.keys(sv).forEach(function(k){var s=sv[k];s._k=k;out.stavby.push(s);});
   out.stavby.sort(function(a,b){return (a.poradi||0)-(b.poradi||0);});
   out.stavby.forEach(function(s){var pl=s.polozky||[];if(!Array.isArray(pl)){var arr=[];Object.keys(pl).forEach(function(k){arr.push(pl[k]);});s.polozky=arr;}});return out;}
@@ -380,8 +472,8 @@ $('s-cancel').addEventListener('click',function(){$('smodal').classList.add('hid
 $('s-save').addEventListener('click',saveStavbaEdit);
 $('smodal').addEventListener('click',function(e){if(e.target===this){this.classList.add('hidden');SCTX=null;}});
 
-function startApp(){if(started)return;started=true;showApp();try{db.ref('/').on('value',function(snap){DATA=normalize(snap.val()||{});render();},function(){});}catch(e){}}
-if(DEMO_MODE){$('demo').classList.remove('hidden');DATA=DEMO;DATA.poznamky={};DATA.upravy={};DATA.rucni={};DATA.stavby_extra={};showApp();$('logout').classList.add('hidden');}
+function startApp(){if(started)return;started=true;showApp();try{db.ref('/').on('value',function(snap){DATA=normalize(snap.val()||{});render();renderZapisy();},function(){});}catch(e){}}
+if(DEMO_MODE){$('demo').classList.remove('hidden');DATA=DEMO;DATA.poznamky={};DATA.upravy={};DATA.rucni={};DATA.stavby_extra={};DATA.zapisy={};showApp();$('logout').classList.add('hidden');}
 else{
   firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.database();
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
