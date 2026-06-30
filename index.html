@@ -44,7 +44,7 @@
   .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)} .b-sml{background:var(--smlouva)} .b-akc{background:#7c3aed}
   .schip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
   .st-green{background:#16a34a;color:#fff} .st-amber{background:#d97706;color:#fff} .st-blue{background:#2563eb;color:#fff} .st-gray{background:#e6eaf0;color:#566273}
-  .st-orange{background:#fde9cf;color:#b45309}
+  .st-akc{background:#7c3aed;color:#fff}
   .st-green2{background:#047857;color:#fff}
   .seg.multi button.on{background:var(--accent);color:#fff;font-weight:700}
   .stavba{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)}
@@ -264,7 +264,7 @@ function typKind(p){var t=(p.typ||'').toUpperCase(),z=(p.zasmluvneni||'').toLowe
   return 'pop';}
 function badgeHtml(p){var k=typKind(p),m={pop:['b-pop','POP'],obj:['b-obj','OBJ'],sml:['b-sml','SML'],akc:['b-akc','AKCEPT']}[k];return '<span class="badge '+m[0]+'">'+m[1]+'</span>';}
 function stavDefault(p){if(p.stav&&String(p.stav).trim())return String(p.stav).trim();if((p.objednano||'').toUpperCase().indexOf('ANO')===0)return 'Objednáno';var z=(p.zasmluvneni||'').toLowerCase();if(z.indexOf('smlouv')!==-1)return 'Zasmluvněno';if(z.indexOf('akcept')!==-1)return 'Akceptováno';if(p.vitez&&String(p.vitez).trim())return 'Vybráno';return 'Poptáno';}
-function stavClass(s){var t=(s||'').toLowerCase();if(/akcept/.test(t))return 'st-orange';if(/zasmluvn/.test(t))return 'st-green2';if(/hotov|dokon|objedn|podeps|uzav/.test(t))return 'st-green';if(/p[řr]ipom[ií]n|[čc]ek|podpis|jedn[áa]|[řr]e[šs][ií]|rozjedn/.test(t))return 'st-amber';if(/popt|v[ýy]b[ěe]r|cn|nab[ií]dk/.test(t))return 'st-blue';return 'st-gray';}
+function stavClass(s){var t=(s||'').toLowerCase();if(/akcept/.test(t))return 'st-akc';if(/zasmluvn/.test(t))return 'st-green2';if(/hotov|dokon|objedn|podeps|uzav/.test(t))return 'st-green';if(/p[řr]ipom[ií]n|[čc]ek|podpis|jedn[áa]|[řr]e[šs][ií]|rozjedn/.test(t))return 'st-amber';if(/popt|v[ýy]b[ěe]r|cn|nab[ií]dk/.test(t))return 'st-blue';return 'st-gray';}
 function koloText(p){var ks=[p.kolo1,p.kolo2,p.kolo3],out=[];for(var i=0;i<3;i++){var v=ks[i];if(v!=null&&String(v).trim()!=='')out.push((i+1)+'. <b>'+esc(String(v).trim())+'</b>');}return out.join('<br>');}
 function exOf(sl){return (DATA.stavby_extra&&DATA.stavby_extra[sl])||{};}
 function origNazev(sl){var o='';(DATA.stavby||[]).forEach(function(s){if(slug(s.nazev)===sl)o=s.nazev;});return o;}
