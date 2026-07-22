@@ -4,17 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Poptávky a objednávky — M - SILNICE a.s.</title>
+<script>
+  // Nastav téma co nejdřív (bez bliknutí): uložená volba, jinak systém.
+  (function(){try{var t=localStorage.getItem('poptavky_theme');
+    if(!t)t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+    document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
 <style>
   :root{--bg:#f4f6f9;--card:#ffffff;--line:#e4e8ef;--txt:#1b2430;--muted:#667488;
     --poptavka:#2563eb;--objednavka:#16a34a;--smlouva:#d97706;--accent:#2563eb;--head:#f2f5fa;--title:#f8fafc;
-    --pos:#16a34a;--neg:#dc2626;--edit:#ffffff;--rucni:#f0f6ff;}
+    --pos:#16a34a;--neg:#dc2626;--edit:#ffffff;--rucni:#f0f6ff;
+    --dul-bg:#fff8e8;--chip-bg:#e6eaf0;--chip-txt:#566273;--star:#c2cbd6;--soft:#fbfcfe;--shadow:rgba(15,23,42,.05);}
+  :root[data-theme="dark"]{--bg:#0f141b;--card:#1a212b;--line:#2b333f;--txt:#e6ebf2;--muted:#93a1b3;
+    --poptavka:#3b82f6;--objednavka:#22c55e;--smlouva:#f59e0b;--accent:#3b82f6;--head:#212a36;--title:#1e2632;
+    --pos:#22c55e;--neg:#f87171;--edit:#232c38;--rucni:#182430;
+    --dul-bg:#2a2410;--chip-bg:#2b333f;--chip-txt:#aab6c5;--star:#556173;--soft:#1e2632;--shadow:rgba(0,0,0,.35);}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);-webkit-text-size-adjust:100%}
-  header{position:sticky;top:0;z-index:5;background:#ffffff;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+  header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 2px var(--shadow)}
   header h1{font-size:16px;margin:0;font-weight:700;line-height:1.2}
   header .sub{font-size:11px;color:var(--muted)} header .spacer{flex:1}
-  .btn{background:#ffffff;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+  .btn{background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
   .btn:hover{border-color:var(--accent)}
+  a.btn{display:inline-flex;align-items:center;text-decoration:none;line-height:1}
+  .btn-home{white-space:nowrap;font-weight:600}
   .btn:active{transform:translateY(1px)}
   .btn-add{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
   .ctrl{background:var(--edit);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 12px;font-size:14px}
@@ -43,7 +56,7 @@
   .badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700;color:#fff}
   .b-pop{background:var(--poptavka)} .b-obj{background:var(--objednavka)} .b-sml{background:var(--smlouva)} .b-akc{background:#7c3aed}
   .schip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
-  .st-green{background:#16a34a;color:#fff} .st-amber{background:#d97706;color:#fff} .st-blue{background:#2563eb;color:#fff} .st-gray{background:#e6eaf0;color:#566273}
+  .st-green{background:#16a34a;color:#fff} .st-amber{background:#d97706;color:#fff} .st-blue{background:#2563eb;color:#fff} .st-gray{background:var(--chip-bg);color:var(--chip-txt)}
   .st-akc{background:#7c3aed;color:#fff}
   .st-sml{background:var(--smlouva);color:#fff}
   .seg.multi button.on{background:var(--accent);color:#fff;font-weight:700}
@@ -69,11 +82,11 @@
   .zm{font-size:10px;color:var(--muted);font-weight:400;margin-top:2px}
   .rowbtn{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--txt);cursor:pointer;font-size:12px;padding:2px 6px;margin-right:4px}
   .rowbtn.del{color:var(--neg);border-color:transparent}
-  .rowbtn.star{border-color:transparent;color:#c2cbd6;font-size:15px} .rowbtn.star:hover{color:#e0a52e} .rowbtn.star.on{color:#e0a52e}
-  tr.dulezite td{background:#fff8e8} tr.dulezite td:first-child{box-shadow:inset 3px 0 0 #e0a52e}
+  .rowbtn.star{border-color:transparent;color:var(--star);font-size:15px} .rowbtn.star:hover{color:#e0a52e} .rowbtn.star.on{color:#e0a52e}
+  tr.dulezite td{background:var(--dul-bg)} tr.dulezite td:first-child{box-shadow:inset 3px 0 0 #e0a52e}
   #f-dul.on{background:#e0a52e;border-color:#e0a52e;color:#241a05;font-weight:700}
   #f-arch.on{background:#475569;border-color:#475569;color:#fff;font-weight:700}
-  .archtag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e6eaf0;color:#566273;vertical-align:middle;letter-spacing:0}
+  .archtag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--chip-bg);color:var(--chip-txt);vertical-align:middle;letter-spacing:0}
   .empty{color:var(--muted);font-size:13px;padding:14px}
   /* modal */
   #modal,#smodal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
@@ -92,16 +105,16 @@
   #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
   #gate .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:340px}
   #gate h2{margin:0 0 4px;font-size:18px} #gate p{margin:0 0 16px;color:var(--muted);font-size:13px}
-  #gate input{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--txt);font-size:15px}
+  #gate input{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:9px;border:1px solid var(--line);background:var(--edit);color:var(--txt);font-size:15px}
   #gate .btn{width:100%;background:var(--accent);border-color:var(--accent);font-weight:700;padding:11px}
   #gate .err{color:#f87171;font-size:12px;min-height:16px;margin-top:6px;word-break:break-word}
   .hidden{display:none!important}
   .demo-bar{background:#7c3a02;color:#ffd9a8;font-size:12px;text-align:center;padding:6px}
   .viewtabs{display:flex;gap:6px;margin:2px 0 12px;flex-wrap:wrap}
-  .vtab{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer}
+  .vtab{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer}
   .vtab:hover{border-color:var(--accent)}
   .vtab.on{background:var(--accent);border-color:var(--accent);color:#fff}
-  .zblok{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fbfcfe}
+  .zblok{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--soft)}
   .zbts{font-size:11px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px}
   .zbts .zbacts{margin-left:auto;display:flex;gap:4px}
   .zbtext{white-space:pre-wrap;font-size:13.5px;line-height:1.55;word-break:break-word}
@@ -116,7 +129,7 @@
   .por-sortsel{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--edit);color:var(--txt)}
   .por-empty{color:var(--muted);font-size:13.5px;line-height:1.6;background:var(--edit);border:1px dashed var(--line);border-radius:12px;padding:18px}
   .porada{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin-bottom:12px;background:var(--card)}
-  .porada.pnew{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent);background:#f5f9ff}
+  .porada.pnew{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent);background:var(--rucni)}
   .porada.pold{opacity:.95}
   .por-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
   .por-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:0 0 auto}
@@ -147,7 +160,7 @@
   .pup{flex:0 0 auto;background:none;border:1px solid var(--line);color:var(--accent);cursor:pointer;font-size:12px;padding:1px 6px;border-radius:6px;margin-top:1px}
   .pup:hover{background:#e7eefc}
   .pbod{display:flex;align-items:flex-start;gap:8px;padding:3px 0}
-  .pbod.prio{background:#fff7ed;border-radius:7px}
+  .pbod.prio{background:var(--dul-bg);border-radius:7px}
   .pbod.prio .ptxt{font-weight:600}
   .pchk{flex:0 0 auto;width:20px;height:20px;border:1.5px solid var(--line);border-radius:6px;background:var(--card);cursor:pointer;font-size:12px;color:#fff;line-height:1;margin-top:2px}
   .pbod.done .pchk{background:#16a34a;border-color:#16a34a}
@@ -174,8 +187,9 @@
 <div id="demo" class="demo-bar hidden">UKÁZKOVÝ REŽIM — data jsou demo, změny se neukládají.</div>
 
 <header class="hidden" id="topbar">
+  <a class="btn btn-home" href="https://pripravar.github.io/OZ-JIH/" title="Zpět na rozcestník aplikací">‹ Aplikace</a>
   <div><h1>Poptávky a objednávky</h1><div class="sub" id="updated">M - SILNICE a.s. · OZ Jih</div></div>
-  <div class="spacer"></div><button class="btn" id="logout">Odhlásit</button>
+  <div class="spacer"></div><button class="btn" id="theme" title="Přepnout světlý/tmavý režim" aria-label="Přepnout téma">🌙</button><button class="btn" id="logout">Odhlásit</button>
 </header>
 
 <div class="wrap hidden" id="app">
@@ -574,6 +588,12 @@ function saveStavbaEdit(){if(!SCTX)return;var sl=SCTX.sl;var o={nazev:$('s-nazev
 $('s-cancel').addEventListener('click',function(){$('smodal').classList.add('hidden');SCTX=null;});
 $('s-save').addEventListener('click',saveStavbaEdit);
 $('smodal').addEventListener('click',function(e){if(e.target===this){this.classList.add('hidden');SCTX=null;}});
+
+// --- Světlý/tmavý režim ---
+function applyThemeIcon(){var t=document.documentElement.getAttribute('data-theme')||'light';var b=$('theme');if(b){b.textContent=(t==='dark')?'☀️':'🌙';b.title=(t==='dark')?'Přepnout na světlý režim':'Přepnout na tmavý režim';}}
+function toggleTheme(){var cur=document.documentElement.getAttribute('data-theme')||'light';var next=(cur==='dark')?'light':'dark';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('poptavky_theme',next);}catch(e){}applyThemeIcon();}
+if($('theme'))$('theme').addEventListener('click',toggleTheme);
+applyThemeIcon();
 
 function startApp(){if(started)return;started=true;showApp();try{db.ref('/').on('value',function(snap){DATA=normalize(snap.val()||{});render();renderPorady();},function(){});}catch(e){}}
 if(DEMO_MODE){$('demo').classList.remove('hidden');DATA=DEMO;DATA.poznamky={};DATA.upravy={};DATA.rucni={};DATA.stavby_extra={};DATA.porady={};showApp();$('logout').classList.add('hidden');}
