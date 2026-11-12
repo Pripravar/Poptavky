@@ -173,6 +173,46 @@
   .por-none{font-size:12px;color:var(--muted);padding:3px 0 3px 28px}
   .pbod-add{margin:6px 0 0 28px;background:none;border:1px dashed var(--line);color:var(--muted);font-size:12px;cursor:pointer;border-radius:7px;padding:4px 10px}
   .pbod-add:hover{background:var(--edit);color:var(--txt)}
+  /* ===== verze + Zápisy z porad (nový jednoduchý model) ===== */
+  .appver{font-size:11px;font-weight:600;color:var(--muted);vertical-align:middle;letter-spacing:.02em}
+  .zk-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:2px 0 14px}
+  .zk-h{font-size:17px;font-weight:800}
+  .zk-seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .zk-tab{background:var(--card);color:var(--muted);border:0;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer}
+  .zk-tab.on{background:var(--accent);color:#fff}
+  .zk-add{display:flex;gap:8px;margin-bottom:14px}
+  .zk-add input{flex:1;background:var(--edit);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:15px}
+  .zk-grp{margin-bottom:16px}
+  .zk-grp-d{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px 2px}
+  .zk-row{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:6px}
+  .zk-row.done .zk-txt{text-decoration:line-through;color:var(--muted)}
+  .zk-row.pozn{background:var(--soft)}
+  .zk-chk{flex:0 0 auto;width:24px;height:24px;border:2px solid var(--line);border-radius:7px;background:transparent;color:#fff;font-size:15px;font-weight:800;cursor:pointer;line-height:20px;padding:0}
+  .zk-row.done .zk-chk{border-color:var(--objednavka);background:var(--objednavka)}
+  .zk-chk:disabled{opacity:.45;cursor:default}
+  .zk-bullet{flex:0 0 auto;width:24px;height:24px;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer;line-height:20px;padding:0}
+  .zk-txt{flex:1;font-size:15px;line-height:1.45;min-height:22px;outline:none;word-break:break-word;white-space:pre-wrap}
+  .zk-txt[contenteditable]:focus{box-shadow:0 2px 0 -1px var(--accent)}
+  .zk-flip,.zk-x{flex:0 0 auto;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:6px;line-height:1.3}
+  .zk-flip:hover,.zk-x:hover{background:var(--edit);color:var(--txt)}
+  .zk-foot{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .zk-del{color:var(--neg);border-color:var(--neg)}
+  .zk-empty{color:var(--muted);font-size:14px;padding:16px;border:1px dashed var(--line);border-radius:12px;line-height:1.55}
+  .zk-arch-top{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .zk-card{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px 14px;margin-bottom:14px;box-shadow:0 1px 3px var(--shadow)}
+  .zk-card.new{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+  .zk-card-h{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .zk-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+  .zk-datum{border:1px solid var(--line);background:var(--edit);color:var(--txt);border-radius:8px;padding:6px 9px;font-size:14px;font-weight:700;width:118px}
+  .zk-newtag{font-size:10px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:2px 8px}
+  .zk-oldtag{font-size:10px;font-weight:700;color:var(--chip-txt);background:var(--chip-bg);border-radius:999px;padding:2px 8px}
+  .zk-spc{flex:1}
+  .zk-cardx{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;padding:5px 9px;font-size:12px;cursor:pointer}
+  .zk-cardx:hover{border-color:var(--neg);color:var(--neg)}
+  .zk-rows{margin-top:2px}
+  .zk-card-add{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .zk-sm{padding:6px 11px;font-size:13px}
+  .zk-none{color:var(--muted);font-size:13px;padding:6px 2px}
 </style>
 </head>
 <body>
@@ -188,7 +228,7 @@
 
 <header class="hidden" id="topbar">
   <a class="btn btn-home" href="https://pripravar.github.io/OZ-JIH/" title="Zpět na rozcestník aplikací">‹ Aplikace</a>
-  <div><h1>Poptávky a objednávky</h1><div class="sub" id="updated">M - SILNICE a.s. · OZ Jih</div></div>
+  <div><h1>Poptávky a objednávky <span class="appver" id="appver"></span></h1><div class="sub" id="updated">M - SILNICE a.s. · OZ Jih</div></div>
   <div class="spacer"></div><button class="btn" id="theme" title="Přepnout světlý/tmavý režim" aria-label="Přepnout téma">🌙</button><button class="btn" id="logout">Odhlásit</button>
 </header>
 
@@ -263,7 +303,7 @@ var DEMO_MODE=isPlaceholder()||/[?&]demo/.test(location.search)||location.hostna
 
 var DATA={meta:{},stavby:[],poznamky:{},upravy:{},rucni:{},stavby_extra:{},dulezite:{},porady:{}};
 var FILTER={q:'',stavba:'',typ:{pop:1,obj:1,sml:1,akc:1},stav:'all',sort:'',dulezite:false,archiv:false,pripravar:'',stavbyvedouci:''};
-var VIEW='stavby',SEKCE_SORT='poradi',PRIO_ONLY=false,SKRYT_VYRESENE=false;
+var VIEW='stavby',SEKCE_SORT='poradi',PRIO_ONLY=false,SKRYT_VYRESENE=false,ZVIEW='ukoly',SHOW_DONE=false,APP_VERSION='2.0';
 var db=null,auth=null,started=false,CTX=null;
 var FIELDS=['komodita','typ','kolo1','kolo2','kolo3','vitez','zasmluvneni','objednano','cenaNakladova','cenaVysoutezena','poznamka','stav'];
 
@@ -439,117 +479,110 @@ var PUID=0;function puid(pfx){return pfx+Date.now().toString(36)+(PUID++).toStri
 function dnesStr(){var d=new Date();function p(n){return (n<10?'0':'')+n;}return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear();}
 function cmpTxt(a,b){return String(a||'￿').localeCompare(String(b||'￿'),'cs',{numeric:true,sensitivity:'base'});}
 function deburr(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();}
-function porStavby(){return (DATA.stavby||[]).map(function(s){var sl=slug(s.nazev),ex=exOf(sl);return {sid:sl,nazev:displayName(s),cislo:ex.cislo||'',pripravar:ex.pripravar||'',stavbyvedouci:ex.stavbyvedouci||'',archiv:!!ex.archiv};});}
-function porStavbaById(sid){var r=null;porStavby().forEach(function(o){if(o.sid===sid)r=o;});return r;}
-function matchStavbaName(text){var t=deburr(text);if(!t)return null;var found=null;porStavby().forEach(function(o){if(found)return;if(deburr(o.nazev)===t)found=o.sid;});return found;}
-function secStavbaId(sek){if(sek.stavbaId&&porStavbaById(sek.stavbaId))return sek.stavbaId;return matchStavbaName(sek.akce);}
-function secHint(sek){var id=secStavbaId(sek);if(!id)return '';var s=porStavbaById(id)||{},parts=[];if(s.cislo)parts.push('č. '+s.cislo);if(s.stavbyvedouci)parts.push('SV '+s.stavbyvedouci);if(s.pripravar)parts.push('PŘ '+s.pripravar);return parts.join(' · ');}
-function secSortKey(sek,mode){var id=secStavbaId(sek),s=id?porStavbaById(id):null;if(mode==='nazev')return s?s.nazev:sek.akce;if(mode==='cislo')return s?s.cislo:sek.akce;if(mode==='stavbyvedouci')return s?s.stavbyvedouci:'';if(mode==='pripravar')return s?s.pripravar:'';return '';}
-var POR_SORTS=[['poradi','ruční pořadí'],['cislo','číslo stavby'],['nazev','název stavby'],['stavbyvedouci','stavbyvedoucí'],['pripravar','přípravář']];
-function poradyOrdered(){return Object.keys(DATA.porady||{}).map(function(pid){return {pid:pid,p:DATA.porady[pid]||{}};}).sort(function(a,b){return (b.p.ts||0)-(a.p.ts||0);});}
-function sekceOrdered(p){if(p.sekce)return Object.keys(p.sekce).map(function(skid){return {skid:skid,s:p.sekce[skid]||{}};}).sort(function(a,b){return (a.s.poradi||0)-(b.s.poradi||0)||(a.skid<b.skid?-1:1);});return [];}
-function sekceSorted(p){var arr=sekceOrdered(p);if(SEKCE_SORT==='poradi')return arr;return arr.slice().sort(function(a,b){return cmpTxt(secSortKey(a.s,SEKCE_SORT),secSortKey(b.s,SEKCE_SORT));});}
-function bodyOrdered(s){var b=s.body||{};return Object.keys(b).sort().map(function(bid){return {bid:bid,b:b[bid]||{}};});}
-function porOpenCount(p){var n=0;sekceOrdered(p).forEach(function(o){bodyOrdered(o.s).forEach(function(x){if(!x.b.done)n++;});});return n;}
-function porPrioCount(p){var n=0;sekceOrdered(p).forEach(function(o){bodyOrdered(o.s).forEach(function(x){if(x.b.prio&&!x.b.done)n++;});});return n;}
-function porStOpts(){return porStavby().filter(function(o){return !o.archiv;}).sort(function(a,b){return cmpTxt(a.nazev,b.nazev);}).map(function(o){return '<option value="'+esc(o.sid)+'">'+esc(o.nazev)+(o.cislo?' (č. '+esc(o.cislo)+')':'')+'</option>';}).join('');}
+/* ===== ZÁPISY Z PORAD — jednoduchý model: porada → řádky; řádek = úkol | poznámka ===== */
+function porList(){return Object.keys(DATA.porady||{}).map(function(pid){return {pid:pid,p:DATA.porady[pid]||{}};}).sort(function(a,b){return (b.p.ts||0)-(a.p.ts||0);});}
+function porRadky(p){
+  if(p.radky)return Object.keys(p.radky).map(function(rid){return {rid:rid,r:p.radky[rid]||{}};}).sort(function(a,b){return (a.r.ts||0)-(b.r.ts||0);});
+  var out=[];if(p.sekce){Object.keys(p.sekce).forEach(function(skid){var sek=p.sekce[skid]||{},b=sek.body||{};Object.keys(b).sort().forEach(function(bid){var x=b[bid]||{};out.push({rid:skid+'~'+bid,r:{text:(sek.akce?'['+sek.akce+'] ':'')+(x.text||''),typ:'ukol',done:!!x.done,_old:true}});});});}
+  return out;
+}
+function newestPid(){var l=porList();for(var i=0;i<l.length;i++){if(l[i].p.radky||!l[i].p.sekce)return l[i].pid;}return null;}
+function porNew(){var pid=puid('p');DATA.porady=DATA.porady||{};var o={datum:dnesStr(),ts:Date.now(),radky:{}};DATA.porady[pid]=o;if(db)db.ref('/porady/'+pid).set(o);return pid;}
+function porDel(pid){if(!confirm('Smazat celou poradu i s poznámkami a úkoly?'))return;delete DATA.porady[pid];if(db)db.ref('/porady/'+pid).remove();renderPorady();}
+function porSaveDatum(pid,txt){var p=DATA.porady[pid];if(!p||p.datum===txt)return;p.datum=txt;if(db)db.ref('/porady/'+pid+'/datum').set(txt);}
+function radAdd(pid,typ){var p=DATA.porady[pid];if(!p)return;p.radky=p.radky||{};var rid=puid('r'),r={text:'',typ:typ,done:false,ts:Date.now()};p.radky[rid]=r;if(db)db.ref('/porady/'+pid+'/radky/'+rid).set(r);renderPorady();var t=document.querySelector('[data-rtxt="'+pid+'~'+rid+'"]');if(t)t.focus();}
+function radText(pid,rid,txt){var p=DATA.porady[pid];if(!p||!p.radky||!p.radky[rid]||p.radky[rid].text===txt)return;p.radky[rid].text=txt;if(db)db.ref('/porady/'+pid+'/radky/'+rid+'/text').set(txt);}
+function radToggle(pid,rid){var p=DATA.porady[pid];if(!p||!p.radky||!p.radky[rid])return;var r=p.radky[rid];r.done=!r.done;if(db)db.ref('/porady/'+pid+'/radky/'+rid+'/done').set(r.done?true:null);renderPorady();}
+function radRetype(pid,rid){var p=DATA.porady[pid];if(!p||!p.radky||!p.radky[rid])return;var r=p.radky[rid];r.typ=(r.typ==='pozn')?'ukol':'pozn';if(db)db.ref('/porady/'+pid+'/radky/'+rid+'/typ').set(r.typ);renderPorady();}
+function radDel(pid,rid){var p=DATA.porady[pid];if(!p||!p.radky||!p.radky[rid])return;delete p.radky[rid];if(db)db.ref('/porady/'+pid+'/radky/'+rid).remove();renderPorady();}
+function quickAdd(){var inp=$('zk-newukol');if(!inp)return;var txt=inp.value.trim();if(!txt)return;var pid=newestPid();if(!pid)pid=porNew();var p=DATA.porady[pid];p.radky=p.radky||{};var rid=puid('r'),r={text:txt,typ:'ukol',done:false,ts:Date.now()};p.radky[rid]=r;if(db)db.ref('/porady/'+pid+'/radky/'+rid).set(r);inp.value='';renderPorady();}
+function smazHotove(){var done=[];porList().forEach(function(o){if(!o.p.radky)return;Object.keys(o.p.radky).forEach(function(rid){var r=o.p.radky[rid]||{};if((r.typ||'ukol')==='ukol'&&r.done)done.push({pid:o.pid,rid:rid});});});if(!done.length){alert('Žádné hotové úkoly ke smazání.');return;}if(!confirm('Smazat '+done.length+' hotových úkolů? Nevratné.'))return;done.forEach(function(d){delete DATA.porady[d.pid].radky[d.rid];if(db)db.ref('/porady/'+d.pid+'/radky/'+d.rid).remove();});renderPorady();}
+
+function ukolRowHtml(pid,x){var r=x.r,old=r._old;
+  return '<div class="zk-row'+(r.done?' done':'')+'">'
+    +'<button class="zk-chk" '+(old?'disabled title="starý záznam – jen k nahlédnutí"':'data-rtog="'+pid+'~'+x.rid+'" title="'+(r.done?'vrátit':'hotovo')+'"')+'>'+(r.done?'✓':'')+'</button>'
+    +'<div class="zk-txt" '+(old?'':'contenteditable="true" data-rtxt="'+pid+'~'+x.rid+'"')+'>'+esc(r.text||'')+'</div>'
+    +(old?'':'<button class="zk-x" data-rdel="'+pid+'~'+x.rid+'" title="smazat">✕</button>')+'</div>';
+}
+function renderUkoly(list){
+  var h='<div class="zk-add"><input id="zk-newukol" placeholder="Nový úkol… (Enter přidá)" autocomplete="off"><button class="btn btn-add" id="zk-addukol">+ Úkol</button></div>';
+  var any=false;
+  list.forEach(function(o){
+    var uk=porRadky(o.p).filter(function(x){return (x.r.typ||'ukol')==='ukol'&&(SHOW_DONE||!x.r.done);});
+    if(!uk.length)return;any=true;
+    h+='<div class="zk-grp"><div class="zk-grp-d">🗓 '+esc(o.p.datum||'(bez data)')+'</div>';
+    uk.forEach(function(x){h+=ukolRowHtml(o.pid,x);});
+    h+='</div>';
+  });
+  if(!any)h+='<div class="zk-empty">Žádné '+(SHOW_DONE?'':'otevřené ')+'úkoly. Přidej nový nahoře, nebo je zapiš v záložce <b>🗓 Zápisy</b> u konkrétní porady.</div>';
+  var doneN=0;list.forEach(function(o){porRadky(o.p).forEach(function(x){if((x.r.typ||'ukol')==='ukol'&&x.r.done)doneN++;});});
+  h+='<div class="zk-foot"><button class="btn" id="zk-donetgl">'+(SHOW_DONE?'skrýt hotové':'zobrazit hotové'+(doneN?' ('+doneN+')':''))+'</button>'
+    +(doneN?'<button class="btn zk-del" id="zk-smazhot">🗑 smazat hotové ('+doneN+')</button>':'')+'</div>';
+  return h;
+}
+function radRowHtml(pid,x){var r=x.r,old=r._old,typ=r.typ||'ukol';
+  if(typ==='pozn')return '<div class="zk-row pozn">'
+    +'<button class="zk-bullet" '+(old?'disabled':'data-rtype="'+pid+'~'+x.rid+'" title="změnit na úkol"')+'>•</button>'
+    +'<div class="zk-txt" '+(old?'':'contenteditable="true" data-rtxt="'+pid+'~'+x.rid+'"')+'>'+esc(r.text||'')+'</div>'
+    +(old?'':'<button class="zk-x" data-rdel="'+pid+'~'+x.rid+'" title="smazat">✕</button>')+'</div>';
+  return '<div class="zk-row'+(r.done?' done':'')+'">'
+    +'<button class="zk-chk" '+(old?'disabled':'data-rtog="'+pid+'~'+x.rid+'" title="'+(r.done?'vrátit':'hotovo')+'"')+'>'+(r.done?'✓':'')+'</button>'
+    +'<div class="zk-txt" '+(old?'':'contenteditable="true" data-rtxt="'+pid+'~'+x.rid+'"')+'>'+esc(r.text||'')+'</div>'
+    +(old?'':'<button class="zk-flip" data-rtype="'+pid+'~'+x.rid+'" title="změnit na poznámku">⇄</button><button class="zk-x" data-rdel="'+pid+'~'+x.rid+'" title="smazat">✕</button>')+'</div>';
+}
+function renderArchiv(list){
+  var h='<div class="zk-arch-top"><button class="btn btn-add" id="por-new">+ Nová porada</button>'
+    +(list.length?'<button class="btn" id="por-print">🖨 Tisk</button>':'')+'</div>';
+  if(!list.length){h+='<div class="zk-empty">Zatím žádná porada. Klikni <b>„+ Nová porada"</b> a piš poznámky a úkoly.</div>';return h;}
+  list.forEach(function(o,i){
+    var p=o.p,old=!p.radky&&p.sekce;
+    h+='<div class="zk-card'+(i===0?' new':'')+'">'
+      +'<div class="zk-card-h"><span class="zk-dot"></span>'
+      +'<input class="zk-datum" '+(old?'disabled':'data-pdat="'+o.pid+'"')+' value="'+esc(p.datum||'')+'" title="datum porady">'
+      +(i===0?'<span class="zk-newtag">nejnovější</span>':'')+(old?'<span class="zk-oldtag">starý formát</span>':'')
+      +'<span class="zk-spc"></span>'
+      +'<button class="zk-cardx" data-pdel="'+o.pid+'" title="smazat poradu">✕ porada</button></div>';
+    var rr=porRadky(p);
+    if(rr.length){h+='<div class="zk-rows">';rr.forEach(function(x){h+=radRowHtml(o.pid,x);});h+='</div>';}
+    else h+='<div class="zk-none">— zatím prázdné —</div>';
+    if(!old)h+='<div class="zk-card-add"><button class="btn zk-sm" data-radd="'+o.pid+'~ukol">+ úkol</button><button class="btn zk-sm" data-radd="'+o.pid+'~pozn">+ poznámka</button></div>';
+    h+='</div>';
+  });
+  return h;
+}
 function renderPorady(){
   var el=$('porady');if(!el)return;
-  var list=poradyOrdered();
-  var openTotal=0,prioTotal=0;list.forEach(function(o){openTotal+=porOpenCount(o.p);prioTotal+=porPrioCount(o.p);});
-  var h='<div class="por-top"><div class="por-h">📋 Zápisy z porad'
-    +'<span class="por-sub">'+list.length+' porad · '+openTotal+' otevřených'+(prioTotal?' · <b class="por-priocnt">⚑ '+prioTotal+' priorit</b>':'')+'</span></div>'
-    +'<div class="por-tools"><select id="por-sort" class="por-sortsel" title="Řazení staveb v zápisu">'
-    +POR_SORTS.map(function(o){return '<option value="'+o[0]+'"'+(SEKCE_SORT===o[0]?' selected':'')+'>řadit: '+o[1]+'</option>';}).join('')+'</select>'
-    +'<button class="btn'+(PRIO_ONLY?' on':'')+'" id="por-prio">⚑ jen priority</button>'
-    +'<button class="btn" id="por-skryt">'+(SKRYT_VYRESENE?'☑ vyřešené skryté':'☐ skrýt vyřešené')+'</button>'
-    +'<button class="btn" id="por-print">🖨️ Tisk</button>'
-    +'<button class="btn btn-add" id="por-new">+ Nová porada</button></div></div>';
-  if(!list.length){h+='<div class="por-empty">Zatím žádný zápis. <b>„+ Nová porada"</b> → přidej stavbu (nebo „všechny aktivní") a piš pod ni poznámky. Sekce = stavby, jdou <b>řadit podle stavbyvedoucího / přípraváře / čísla</b>. Vyřešené odškrtni „✓", důležité označ vlaječkou <b>⚑</b>. <b>„↧ Přenést nevyřešené"</b> stáhne z minula vše otevřené, nebo přenes jednotlivě tlačítkem <b>↥</b> u poznámky.</div>';el.innerHTML=h;return;}
-  var stOpts=porStOpts();
-  list.forEach(function(o,i){
-    var p=o.p,isNew=(i===0),prev=list[i+1];
-    h+='<div class="porada'+(isNew?' pnew':' pold')+'" data-por="'+o.pid+'">'
-      +'<div class="por-head"><span class="por-dot"></span>'
-      +'<input class="por-datum" data-pdat="'+o.pid+'" value="'+esc(p.datum||'')+'" title="datum porady">'
-      +(isNew?'<span class="por-tag">nejnovější</span>':'')
-      +'<span class="por-spc"></span>'
-      +(prev?'<button class="por-carry" data-pcarry="'+o.pid+'" title="zkopíruje sem všechny neodškrtnuté body z porady '+esc(prev.p.datum||'')+'">↧ Přenést vše nevyřešené z '+esc(prev.p.datum||'minulé')+'</button>':'')
-      +'<button class="por-x" data-pdel="'+o.pid+'" title="smazat celou poradu">✕ porada</button></div>';
-    var seks=sekceSorted(p),shownSek=0;
-    seks.forEach(function(so){
-      var bods=bodyOrdered(so.s),vis=bods.filter(function(x){return !(x.b.done&&SKRYT_VYRESENE)&&(!PRIO_ONLY||x.b.prio);});
-      if((SKRYT_VYRESENE||PRIO_ONLY)&&!vis.length)return;
-      shownSek++;var hint=secHint(so.s);
-      h+='<div class="psek" data-skid="'+so.skid+'"><div class="psek-head"><input class="psek-akce" data-pakce="'+o.pid+'|'+so.skid+'" value="'+esc(so.s.akce||'')+'" placeholder="Stavba / akce">'
-        +(hint?'<span class="psek-hint">'+esc(hint)+'</span>':'')
-        +'<button class="psek-x" data-pskdel="'+o.pid+'|'+so.skid+'" title="smazat sekci">✕</button></div>';
-      vis.forEach(function(x){
-        h+='<div class="pbod'+(x.b.done?' done':'')+(x.b.prio?' prio':'')+'">'
-          +'<button class="pchk" data-ptog="'+o.pid+'|'+so.skid+'|'+x.bid+'" title="'+(x.b.done?'vrátit jako otevřené':'označit vyřešeno')+'">'+(x.b.done?'✓':'')+'</button>'
-          +'<div class="ptxt" contenteditable="true" data-ptxt="'+o.pid+'|'+so.skid+'|'+x.bid+'" placeholder="napiš poznámku…">'+esc(x.b.text||'')+'</div>'
-          +'<button class="pflag'+(x.b.prio?' on':'')+'" data-pprio="'+o.pid+'|'+so.skid+'|'+x.bid+'" title="prioritní úkol">⚑</button>'
-          +(!isNew&&!x.b.done?'<button class="pup" data-pup="'+o.pid+'|'+so.skid+'|'+x.bid+'" title="přenést tuto poznámku do nejnovější porady">↥</button>':'')
-          +'<button class="pbx" data-pbdel="'+o.pid+'|'+so.skid+'|'+x.bid+'" title="smazat poznámku">✕</button></div>';
-      });
-      if(!vis.length)h+='<div class="por-none">— '+(PRIO_ONLY?'žádné priority':'vše vyřešené')+' —</div>';
-      h+='<button class="pbod-add" data-padd="'+o.pid+'|'+so.skid+'">+ poznámka</button></div>';
-    });
-    if(!shownSek)h+='<div class="por-none" style="padding-left:2px">— '+(PRIO_ONLY?'žádné prioritní poznámky':'žádné poznámky')+' —</div>';
-    h+='<div class="psek-tools"><select class="psek-pick" data-ppick="'+o.pid+'"><option value="">+ přidat stavbu…</option>'+stOpts+'</select>'
-      +'<button class="psek-add" data-pseka="'+o.pid+'">+ volná sekce</button>'
-      +'<button class="psek-add" data-pall="'+o.pid+'">+ všechny aktivní stavby</button></div></div>';
-  });
+  var list=porList();
+  var open=0;list.forEach(function(o){porRadky(o.p).forEach(function(x){if((x.r.typ||'ukol')==='ukol'&&!x.r.done)open++;});});
+  var h='<div class="zk-top"><div class="zk-h">📋 Zápisy z porad</div>'
+    +'<div class="zk-seg"><button class="zk-tab'+(ZVIEW==='ukoly'?' on':'')+'" data-zview="ukoly">✅ Úkoly'+(open?' ('+open+')':'')+'</button>'
+    +'<button class="zk-tab'+(ZVIEW==='archiv'?' on':'')+'" data-zview="archiv">🗓 Zápisy'+(list.length?' ('+list.length+')':'')+'</button></div></div>';
+  h+=(ZVIEW==='archiv')?renderArchiv(list):renderUkoly(list);
   el.innerHTML=h;
 }
-function porFind(pid){return DATA.porady[pid];}
-function porMaxPoradi(p){var m=0;sekceOrdered(p).forEach(function(o){if((o.s.poradi||0)>m)m=o.s.poradi||0;});return m;}
-function porNewSekceObj(akce,poradi,stavbaId){var o={akce:akce||'',poradi:poradi,body:{}};if(stavbaId)o.stavbaId=stavbaId;return o;}
-function porWriteSekce(pid,skid,sek){if(db)db.ref('/porady/'+pid+'/sekce/'+skid).set(sek);}
-function porNew(){var pid=puid('p');DATA.porady=DATA.porady||{};DATA.porady[pid]={datum:dnesStr(),ts:Date.now(),sekce:{}};if(db)db.ref('/porady/'+pid).set(DATA.porady[pid]);renderPorady();var sel=document.querySelector('[data-ppick="'+pid+'"]');if(sel)sel.focus();}
-function porAddSekce(pid){var p=porFind(pid);if(!p)return;p.sekce=p.sekce||{};var skid=puid('s');p.sekce[skid]=porNewSekceObj('',porMaxPoradi(p)+1);var bid=puid('b');p.sekce[skid].body[bid]={text:'',done:false};porWriteSekce(pid,skid,p.sekce[skid]);renderPorady();var t=document.querySelector('[data-pakce="'+pid+'|'+skid+'"]');if(t)t.focus();}
-function porAddStavba(pid,sid){var p=porFind(pid),s=porStavbaById(sid);if(!p||!s)return;p.sekce=p.sekce||{};var skid=puid('s');p.sekce[skid]=porNewSekceObj(s.nazev||sid,porMaxPoradi(p)+1,sid);var bid=puid('b');p.sekce[skid].body[bid]={text:'',done:false};porWriteSekce(pid,skid,p.sekce[skid]);renderPorady();var t=document.querySelector('[data-ptxt="'+pid+'|'+skid+'|'+bid+'"]');if(t)t.focus();}
-function porAddAllStavby(pid){var p=porFind(pid);if(!p)return;p.sekce=p.sekce||{};var have={};sekceOrdered(p).forEach(function(o){var id=secStavbaId(o.s);if(id)have[id]=1;});var add=porStavby().filter(function(o){return !o.archiv&&!have[o.sid];}).sort(function(a,b){return cmpTxt(a.nazev,b.nazev);});if(!add.length){alert('Všechny aktivní stavby už v poradě jsou.');return;}var por=porMaxPoradi(p);add.forEach(function(o){var skid=puid('s');p.sekce[skid]=porNewSekceObj(o.nazev||o.sid,++por,o.sid);porWriteSekce(pid,skid,p.sekce[skid]);});renderPorady();}
-function porAddBod(pid,skid){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid])return;p.sekce[skid].body=p.sekce[skid].body||{};var bid=puid('b');p.sekce[skid].body[bid]={text:'',done:false};if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/body/'+bid).set(p.sekce[skid].body[bid]);renderPorady();var t=document.querySelector('[data-ptxt="'+pid+'|'+skid+'|'+bid+'"]');if(t)t.focus();}
-function porToggle(pid,skid,bid){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid]||!p.sekce[skid].body[bid])return;var b=p.sekce[skid].body[bid];b.done=!b.done;if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/body/'+bid+'/done').set(b.done?true:null);renderPorady();}
-function porTogglePrio(pid,skid,bid){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid]||!p.sekce[skid].body[bid])return;var b=p.sekce[skid].body[bid];b.prio=!b.prio;if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/body/'+bid+'/prio').set(b.prio?true:null);renderPorady();}
-function porDelBod(pid,skid,bid){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid])return;delete p.sekce[skid].body[bid];if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/body/'+bid).remove();renderPorady();}
-function porDelSekce(pid,skid){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid])return;var has=Object.keys(p.sekce[skid].body||{}).length;if(has&&!confirm('Smazat sekci „'+(p.sekce[skid].akce||'(bez názvu)')+'" i s poznámkami?'))return;delete p.sekce[skid];if(db)db.ref('/porady/'+pid+'/sekce/'+skid).remove();renderPorady();}
-function porDel(pid){if(!confirm('Smazat celou poradu i se všemi stavbami a poznámkami?'))return;delete DATA.porady[pid];if(db)db.ref('/porady/'+pid).remove();renderPorady();}
-function porSaveText(pid,skid,bid,txt){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid]||!p.sekce[skid].body[bid])return;if(p.sekce[skid].body[bid].text===txt)return;p.sekce[skid].body[bid].text=txt;if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/body/'+bid+'/text').set(txt);}
-function porSaveAkce(pid,skid,txt){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid]||p.sekce[skid].akce===txt)return;p.sekce[skid].akce=txt;if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/akce').set(txt);renderPorady();}
-function porSaveDatum(pid,txt){var p=porFind(pid);if(!p||p.datum===txt)return;p.datum=txt;if(db)db.ref('/porady/'+pid+'/datum').set(txt);}
-function porFindOrCreateSekce(pid,akce,stavbaId){var p=porFind(pid);p.sekce=p.sekce||{};var found=null;sekceOrdered(p).forEach(function(o){if(found)return;var oid=secStavbaId(o.s);if(stavbaId&&oid===stavbaId)found=o.skid;else if(!stavbaId&&akce&&deburr(o.s.akce)===deburr(akce))found=o.skid;});if(found)return found;var skid=puid('s');p.sekce[skid]=porNewSekceObj(akce||'',porMaxPoradi(p)+1,stavbaId);porWriteSekce(pid,skid,p.sekce[skid]);return skid;}
-function porCarry(pid){var p=porFind(pid);if(!p)return;var list=poradyOrdered(),idx=-1;list.forEach(function(o,i){if(o.pid===pid)idx=i;});var prev=list[idx+1];if(!prev){alert('Žádná starší porada k přenosu.');return;}var moved=0;p.sekce=p.sekce||{};sekceOrdered(prev.p).forEach(function(so){var open=bodyOrdered(so.s).filter(function(x){return !x.b.done;});if(!open.length)return;var skid=porFindOrCreateSekce(pid,so.s.akce||'',secStavbaId(so.s)?(so.s.stavbaId||secStavbaId(so.s)):null);open.forEach(function(x){var bid=puid('b');var nb={text:x.b.text||'',done:false};if(x.b.prio)nb.prio=true;p.sekce[skid].body[bid]=nb;moved++;if(db)db.ref('/porady/'+pid+'/sekce/'+skid+'/body/'+bid).set(nb);});});renderPorady();if(!moved)alert('Z porady '+(prev.p.datum||'')+' nezbyly žádné nevyřešené poznámky.');}
-function porCarryOne(pid,skid,bid){var p=porFind(pid);if(!p||!p.sekce||!p.sekce[skid]||!p.sekce[skid].body[bid])return;var newest=poradyOrdered()[0];if(!newest||newest.pid===pid){alert('Tohle už je nejnovější porada.');return;}var so=p.sekce[skid],x=so.body[bid];var tskid=porFindOrCreateSekce(newest.pid,so.akce||'',secStavbaId(so)?(so.stavbaId||secStavbaId(so)):null);var nbid=puid('b'),nb={text:x.text||'',done:false};if(x.prio)nb.prio=true;DATA.porady[newest.pid].sekce[tskid].body[nbid]=nb;if(db)db.ref('/porady/'+newest.pid+'/sekce/'+tskid+'/body/'+nbid).set(nb);renderPorady();}
-function porPrint(){var list=poradyOrdered(),w=window.open('','_blank');if(!w)return;var html='<html><head><meta charset="utf-8"><title>Zápis z porad</title><style>body{font-family:Arial,sans-serif;color:#111;max-width:820px;margin:24px auto;padding:0 16px}h1{font-size:18px}h2{font-size:15px;border-bottom:1px solid #999;padding-bottom:3px;margin-top:22px}h3{font-size:13px;margin:12px 0 2px}ul{margin:3px 0 10px}li{margin:2px 0;line-height:1.4}.d{text-decoration:line-through;color:#777}.pr{font-weight:700}</style></head><body>';html+='<h1>Zápisy z porad — M - SILNICE a.s. · OZ Jih</h1>';list.forEach(function(o){var p=o.p;html+='<h2>Porada '+esc(p.datum||'')+'</h2>';sekceSorted(p).forEach(function(so){var bods=bodyOrdered(so.s);if(!bods.length&&!so.s.akce)return;if(so.s.akce)html+='<h3>'+esc(so.s.akce)+'</h3>';html+='<ul>';bods.forEach(function(x){html+='<li class="'+(x.b.done?'d':'')+(x.b.prio?' pr':'')+'">'+(x.b.done?'✓ ':x.b.prio?'⚑ ':'• ')+esc(x.b.text||'')+'</li>';});html+='</ul>';});});html+='</body></html>';w.document.write(html);w.document.close();w.focus();w.print();}
+function porPrint(){var list=porList(),w=window.open('','_blank');if(!w)return;var H='<html><head><meta charset="utf-8"><title>Zápisy z porad</title><style>body{font-family:Arial,sans-serif;color:#111;max-width:820px;margin:24px auto;padding:0 16px}h1{font-size:18px}h2{font-size:15px;border-bottom:1px solid #999;padding-bottom:3px;margin-top:22px}ul{margin:4px 0 12px;list-style:none;padding-left:0}li{margin:2px 0;line-height:1.4}.d{text-decoration:line-through;color:#777}</style></head><body><h1>Zápisy z porad — M - SILNICE a.s. · OZ Jih</h1>';list.forEach(function(o){var p=o.p;H+='<h2>Porada '+esc(p.datum||'')+'</h2><ul>';porRadky(p).forEach(function(x){var r=x.r,t=(r.typ||'ukol'),mark=(t==='pozn')?'• ':(r.done?'✓ ':'☐ ');H+='<li class="'+(r.done?'d':'')+'">'+mark+esc(r.text||'')+'</li>';});H+='</ul>';});H+='</body></html>';w.document.write(H);w.document.close();w.focus();w.print();}
+
 $('v-stavby').addEventListener('click',function(){setView('stavby');});
 $('v-zapisy').addEventListener('click',function(){setView('zapisy');});
 $('porady').addEventListener('click',function(e){
+  var zv=e.target.closest('[data-zview]');if(zv){ZVIEW=zv.getAttribute('data-zview');renderPorady();return;}
+  if(e.target.closest('#zk-addukol')){quickAdd();return;}
+  if(e.target.closest('#por-new')){porNew();ZVIEW='archiv';renderPorady();var d=document.querySelector('.zk-datum[data-pdat]');if(d)d.focus();return;}
   if(e.target.closest('#por-print')){porPrint();return;}
-  if(e.target.closest('#por-skryt')){SKRYT_VYRESENE=!SKRYT_VYRESENE;renderPorady();return;}
-  if(e.target.closest('#por-prio')){PRIO_ONLY=!PRIO_ONLY;renderPorady();return;}
-  if(e.target.closest('#por-new')){porNew();return;}
-  var cy=e.target.closest('[data-pcarry]');if(cy){porCarry(cy.getAttribute('data-pcarry'));return;}
-  var up=e.target.closest('[data-pup]');if(up){var u=up.getAttribute('data-pup').split('|');porCarryOne(u[0],u[1],u[2]);return;}
-  var al=e.target.closest('[data-pall]');if(al){porAddAllStavby(al.getAttribute('data-pall'));return;}
-  var sa=e.target.closest('[data-pseka]');if(sa){porAddSekce(sa.getAttribute('data-pseka'));return;}
-  var ad=e.target.closest('[data-padd]');if(ad){var a=ad.getAttribute('data-padd').split('|');porAddBod(a[0],a[1]);return;}
-  var pr=e.target.closest('[data-pprio]');if(pr){var pp=pr.getAttribute('data-pprio').split('|');porTogglePrio(pp[0],pp[1],pp[2]);return;}
-  var tg=e.target.closest('[data-ptog]');if(tg){var t=tg.getAttribute('data-ptog').split('|');porToggle(t[0],t[1],t[2]);return;}
-  var bd=e.target.closest('[data-pbdel]');if(bd){var d=bd.getAttribute('data-pbdel').split('|');porDelBod(d[0],d[1],d[2]);return;}
-  var sd=e.target.closest('[data-pskdel]');if(sd){var s=sd.getAttribute('data-pskdel').split('|');porDelSekce(s[0],s[1]);return;}
+  if(e.target.closest('#zk-donetgl')){SHOW_DONE=!SHOW_DONE;renderPorady();return;}
+  if(e.target.closest('#zk-smazhot')){smazHotove();return;}
+  var ad=e.target.closest('[data-radd]');if(ad){var a=ad.getAttribute('data-radd').split('~');radAdd(a[0],a[1]);return;}
+  var tg=e.target.closest('[data-rtog]');if(tg){var t=tg.getAttribute('data-rtog').split('~');radToggle(t[0],t[1]);return;}
+  var rt=e.target.closest('[data-rtype]');if(rt){var y=rt.getAttribute('data-rtype').split('~');radRetype(y[0],y[1]);return;}
+  var dl=e.target.closest('[data-rdel]');if(dl){var d2=dl.getAttribute('data-rdel').split('~');radDel(d2[0],d2[1]);return;}
   var pd=e.target.closest('[data-pdel]');if(pd){porDel(pd.getAttribute('data-pdel'));return;}
 });
-$('porady').addEventListener('change',function(e){
-  if(e.target.id==='por-sort'){SEKCE_SORT=e.target.value;renderPorady();return;}
-  var pk=e.target.closest('[data-ppick]');if(pk&&e.target.value){porAddStavba(pk.getAttribute('data-ppick'),e.target.value);return;}
-});
+$('porady').addEventListener('keydown',function(e){if(e.target.id==='zk-newukol'&&e.key==='Enter'){e.preventDefault();quickAdd();}});
 $('porady').addEventListener('focusout',function(e){
-  var tx=e.target.closest('[data-ptxt]');if(tx){var p=tx.getAttribute('data-ptxt').split('|');porSaveText(p[0],p[1],p[2],tx.textContent.trim());return;}
-  var ak=e.target.closest('[data-pakce]');if(ak){var a=ak.getAttribute('data-pakce').split('|');porSaveAkce(a[0],a[1],ak.value.trim());return;}
+  var tx=e.target.closest('[data-rtxt]');if(tx){var p=tx.getAttribute('data-rtxt').split('~');radText(p[0],p[1],tx.textContent.trim());return;}
   var dt=e.target.closest('[data-pdat]');if(dt){porSaveDatum(dt.getAttribute('data-pdat'),dt.value.trim());return;}
 });
+try{var _av=$('appver');if(_av)_av.textContent='v'+APP_VERSION;}catch(e){}
 
 function showApp(){$('gate').classList.add('hidden');$('topbar').classList.remove('hidden');$('app').classList.remove('hidden');render();renderPorady();}
 function normalize(raw){var out={meta:(raw&&raw.meta)||{},stavby:[],poznamky:(raw&&raw.poznamky)||{},upravy:(raw&&raw.upravy)||{},rucni:(raw&&raw.rucni)||{},stavby_extra:(raw&&raw.stavby_extra)||{},dulezite:(raw&&raw.dulezite)||{},porady:(raw&&raw.porady)||{}};
